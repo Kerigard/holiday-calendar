@@ -1,6 +1,6 @@
 # Календарь нерабочих и сокращенных дней
 
-Календарь в формате iCal основанный на [xmlcalendar](https://github.com/xmlcalendar/data). Автоматически обновляется каждый день.
+Календарь в формате iCalendar основанный на [xmlcalendar](https://github.com/xmlcalendar/data). Автоматически обновляется каждый день.
 
 Для подписки на календарь используется ссылка: https://kerigard.github.io/holiday-calendar/holidays.ics.
 

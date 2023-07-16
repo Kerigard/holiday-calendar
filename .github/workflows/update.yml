@@ -1,0 +1,27 @@
+name: update
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    name: Update holiday calendar
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Update iCalendar files
+        id: update
+        uses: ./action
+        with:
+          working_directory: action
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: ${{ steps.update.outputs.commit_message }}
