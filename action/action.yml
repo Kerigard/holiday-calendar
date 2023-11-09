@@ -8,6 +8,9 @@ inputs:
     description: Default directory
     required: false
     default: ''
+  token:
+    description: GitHub token
+    required: true
 
 outputs:
   commit_message:

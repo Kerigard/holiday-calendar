@@ -20,6 +20,7 @@ jobs:
         uses: ./action
         with:
           working_directory: action
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4

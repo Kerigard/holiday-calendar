@@ -1,4 +1,4 @@
-import {HttpClient} from '@actions/http-client'
+import {getOctokit} from '@actions/github'
 import md5 from 'blueimp-md5'
 import ical, {ICalEventTransparency} from 'ical-generator'
 import {parseStringPromise} from 'xml2js'
@@ -11,35 +11,26 @@ export interface Holiday {
   shortened_day: boolean
 }
 
-export const getYears = async (): Promise<number[]> => {
-  const response = await new HttpClient().get('http://xmlcalendar.ru/data/ru/all/calendar.json')
+export const getYears = async (token: string): Promise<number[]> => {
+  const {data} = await getOctokit(token).rest.repos.getContent({
+    owner: 'xmlcalendar',
+    repo: 'data',
+    path: 'ru'
+  })
 
-  if (response.message.statusCode !== 200) {
-    throw new Error(response.message.statusMessage)
-  }
+  if (!Array.isArray(data)) return []
 
-  const data = JSON.parse(await response.readBody()) as {
-    year: number
-    months: {month: number; days: string}[]
-    transitions: {from: string; to: string}[]
-    statistic: {
-      workdays: number
-      holidays: number
-      hours40: number
-      hours36: number
-      hours24: number
-    }
-  }[]
-
-  return data.map(n => n.year)
+  return data.map(n => +n.name)
 }
 
-export const getHolidays = async (year: number): Promise<Holiday[]> => {
-  const response = await new HttpClient().get(`http://xmlcalendar.ru/data/ru/${year}/calendar.xml`)
+export const getHolidays = async (token: string, year: number): Promise<Holiday[]> => {
+  const response = await getOctokit(token).rest.repos.getContent({
+    owner: 'xmlcalendar',
+    repo: 'data',
+    path: `ru/${year}/calendar.xml`
+  })
 
-  if (response.message.statusCode !== 200) {
-    throw new Error(response.message.statusMessage)
-  }
+  if (Array.isArray(response.data) || response.data.type !== 'file') return []
 
   const xml: {
     calendar: {
@@ -47,7 +38,7 @@ export const getHolidays = async (year: number): Promise<Holiday[]> => {
       holidays: {holiday: {$: {id: string; title: string}}[]}[]
       days: {day: {$: {d: string; t: string; h?: string; f?: string}}[]}[]
     }
-  } = await parseStringPromise(await response.readBody())
+  } = await parseStringPromise(Buffer.from(response.data.content, 'base64'))
 
   const days: {[key: number]: string} = []
   const data: Holiday[] = []
