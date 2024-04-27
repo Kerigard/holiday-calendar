@@ -9,6 +9,7 @@ export interface Holiday {
   started_at: Date
   ended_at: Date
   shortened_day: boolean
+  working_day: boolean
 }
 
 export const getYears = async (token: string): Promise<number[]> => {
@@ -49,40 +50,42 @@ export const getHolidays = async (token: string, year: number): Promise<Holiday[
   }
 
   for (const holiday of xml.calendar.days[0].day) {
-    if (+holiday.$.t === 3) {
-      continue
-    }
-
     let title = holiday.$.h ? days[+holiday.$.h] : ''
     const parts = holiday.$.d.split('.')
     const date = new Date(`${year}-${parts[0]}-${parts[1]}`)
 
     if (!title && data.length > 0) {
-      const diff = (date.getTime() - data[data.length - 1].started_at.getTime()) / (1000 * 3600 * 24)
+      if (+holiday.$.t === 3) {
+        title = '* Рабочий день'
+      } else if (data.length > 0 && !data[data.length - 1].working_day) {
+        const diff = (date.getTime() - data[data.length - 1].started_at.getTime()) / (1000 * 3600 * 24)
 
-      if (diff === 1) {
-        title = data[data.length - 1].title
-      } else if ((diff <= 3 && [0, 1].includes(date.getDay())) || (diff === 3 && [1, 2].includes(date.getDay()))) {
-        title = data[data.length - 1].title
+        if (diff === 1) {
+          title = data[data.length - 1].title
+        } else if ((diff <= 3 && [0, 1].includes(date.getDay())) || (diff === 3 && [1, 2].includes(date.getDay()))) {
+          title = data[data.length - 1].title
 
-        if (!data[data.length - 1].shortened_day) {
-          if (diff === 3) {
+          if (!data[data.length - 1].shortened_day) {
+            if (diff === 3) {
+              data.push({
+                title,
+                year,
+                started_at: addDays(date, -2),
+                ended_at: date,
+                shortened_day: false,
+                working_day: false
+              })
+            }
+
             data.push({
               title,
               year,
-              started_at: addDays(date, -2),
+              started_at: addDays(date, -1),
               ended_at: date,
-              shortened_day: false
+              shortened_day: false,
+              working_day: false
             })
           }
-
-          data.push({
-            title,
-            year,
-            started_at: addDays(date, -1),
-            ended_at: date,
-            shortened_day: false
-          })
         }
       }
     }
@@ -92,7 +95,8 @@ export const getHolidays = async (token: string, year: number): Promise<Holiday[
       year,
       started_at: date,
       ended_at: date,
-      shortened_day: +holiday.$.t === 2
+      shortened_day: +holiday.$.t === 2,
+      working_day: +holiday.$.t === 3
     })
   }
 
