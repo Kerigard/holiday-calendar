@@ -65,6 +65,9 @@ const getHolidays = async (token, year) => {
         days[+holiday.$.id] = holiday.$.title;
     }
     for (const holiday of xml.calendar.days[0].day) {
+        if (+holiday.$.t === 3) {
+            continue;
+        }
         let title = holiday.$.h ? days[+holiday.$.h] : '';
         const parts = holiday.$.d.split('.');
         const date = new Date(`${year}-${parts[0]}-${parts[1]}`);

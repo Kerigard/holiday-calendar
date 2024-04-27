@@ -49,6 +49,10 @@ export const getHolidays = async (token: string, year: number): Promise<Holiday[
   }
 
   for (const holiday of xml.calendar.days[0].day) {
+    if (+holiday.$.t === 3) {
+      continue
+    }
+
     let title = holiday.$.h ? days[+holiday.$.h] : ''
     const parts = holiday.$.d.split('.')
     const date = new Date(`${year}-${parts[0]}-${parts[1]}`)
