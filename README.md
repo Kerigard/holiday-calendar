@@ -4,6 +4,10 @@
 
 Для подписки на календарь используется ссылка: https://kerigard.github.io/holiday-calendar/holidays.ics.
 
+## Предварительный просмотр
+
+[Посмотреть календарь](https://kerigard.github.io/holiday-calendar)
+
 ## Инструкция по добавлению календаря
 
 ### Google Календарь

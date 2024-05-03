@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Календарь нерабочих и сокращенных дней</title>
+
+  <style>
+    .container {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      color: #24292e;
+      background-color: #fff;
+      max-width: 1012px;
+      margin: 32px auto;
+      padding: 16px 0;
+    }
+
+    .fc-toolbar-title {
+      text-transform: capitalize;
+    }
+    .fc-daygrid-event {
+      white-space: normal;
+    }
+  </style>
+
+  <script defer src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@1/src/zero-md.min.js"></script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/index.global.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales-all.global.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.11/index.global.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@fullcalendar/icalendar@6.1.11/index.global.min.js"></script>
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: ''
+        },
+        titleFormat: function (date) {
+          return date.date.marker.toLocaleDateString('ru-RU', { month: 'long' }) +
+            ' ' + date.date.marker.toLocaleDateString('ru-RU', { year: 'numeric' });
+        },
+        locale: 'ru',
+        events: {
+          url: 'holidays.ics',
+          format: 'ics'
+        }
+      });
+      calendar.render();
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div id="calendar"></div>
+    <zero-md src="README.md" style="margin-top: 16px;"></zero-md>
+  </div>
+</body>
+</html>
