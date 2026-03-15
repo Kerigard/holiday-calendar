@@ -2,37 +2,52 @@
   "name": "holiday-calendar",
   "version": "1.0.0",
   "description": "Календарь в формате iCalendar основанный на http://xmlcalendar.ru.",
-  "main": "lib/index.js",
   "scripts": {
-    "start": "npx ts-node src/index.ts",
-    "build": "tsc",
-    "format": "prettier --write src/**/*.ts",
-    "lint": "eslint src/**/*.ts",
-    "package": "ncc build --source-map --license licenses.txt",
-    "all": "npm run build && npm run format && npm run lint && npm run package"
+    "bundle": "npm run format:write && npm run package",
+    "format:write": "npx prettier --write .",
+    "format:check": "npx prettier --check .",
+    "lint": "npx eslint .",
+    "local-action": "npx @github/local-action . src/main.ts .env",
+    "package": "npx rimraf ./dist && npx rollup --config rollup.config.mjs --configPlugin @rollup/plugin-typescript",
+    "package:watch": "npm run package -- --watch",
+    "all": "npm run format:write && npm run lint && npm run package"
   },
   "keywords": [],
   "author": "Kerigard",
   "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/github": "^6.0.0",
+    "@actions/core": "^3.0.0",
+    "@actions/github": "^9.0.0",
     "blueimp-md5": "^2.19.0",
-    "dotenv": "^16.3.1",
-    "ical-generator": "^5.0.0",
-    "xml2js": "^0.6.0"
+    "ical-generator": "^10.0.0",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "@types/blueimp-md5": "^2.18.0",
-    "@types/node": "^20.4.2",
-    "@types/xml2js": "^0.4.11",
-    "@typescript-eslint/parser": "^5.62.0",
-    "@vercel/ncc": "^0.36.1",
-    "eslint": "^8.45.0",
-    "eslint-plugin-github": "^4.9.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "prettier": "^3.0.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
+    "@github/local-action": "^7.0.1",
+    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/blueimp-md5": "^2.18.2",
+    "@types/node": "^25.5.0",
+    "@types/xml2js": "^0.4.14",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1",
+    "rollup": "^4.59.0",
+    "typescript": "^5.9.3"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "*"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }

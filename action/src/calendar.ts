@@ -1,6 +1,6 @@
 import {getOctokit} from '@actions/github'
 import md5 from 'blueimp-md5'
-import ical, {ICalEventTransparency} from 'ical-generator'
+import {ICalCalendar, ICalEventTransparency} from 'ical-generator'
 import {parseStringPromise} from 'xml2js'
 
 export interface Holiday {
@@ -145,7 +145,7 @@ export const getHolidays = async (token: string, year: number): Promise<Holiday[
 }
 
 export const createCalendar = (holidays: Holiday[]): string => {
-  const calendar = ical({
+  const calendar = new ICalCalendar({
     name: 'Производственный календарь',
     ttl: 86400
   })
