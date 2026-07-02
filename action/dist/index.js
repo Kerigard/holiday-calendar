@@ -2710,15 +2710,24 @@ function requireDispatcherBase () {
 	const kOnDestroyed = Symbol('onDestroyed');
 	const kOnClosed = Symbol('onClosed');
 	const kInterceptedDispatch = Symbol('Intercepted Dispatch');
+	const kWebSocketOptions = Symbol('webSocketOptions');
 
 	class DispatcherBase extends Dispatcher {
-	  constructor () {
+	  constructor (opts) {
 	    super();
 
 	    this[kDestroyed] = false;
 	    this[kOnDestroyed] = null;
 	    this[kClosed] = false;
 	    this[kOnClosed] = [];
+	    this[kWebSocketOptions] = opts?.webSocket ?? {};
+	  }
+
+	  get webSocketOptions () {
+	    return {
+	      maxFragments: this[kWebSocketOptions].maxFragments ?? 131072,
+	      maxPayloadSize: this[kWebSocketOptions].maxPayloadSize ?? 128 * 1024 * 1024
+	    }
 	  }
 
 	  get destroyed () {
@@ -3600,9 +3609,9 @@ var hasRequiredConstants$3;
 function requireConstants$3 () {
 	if (hasRequiredConstants$3) return constants$3;
 	hasRequiredConstants$3 = 1;
-	(function (exports$1) {
-		Object.defineProperty(exports$1, "__esModule", { value: true });
-		exports$1.SPECIAL_HEADERS = exports$1.HEADER_STATE = exports$1.MINOR = exports$1.MAJOR = exports$1.CONNECTION_TOKEN_CHARS = exports$1.HEADER_CHARS = exports$1.TOKEN = exports$1.STRICT_TOKEN = exports$1.HEX = exports$1.URL_CHAR = exports$1.STRICT_URL_CHAR = exports$1.USERINFO_CHARS = exports$1.MARK = exports$1.ALPHANUM = exports$1.NUM = exports$1.HEX_MAP = exports$1.NUM_MAP = exports$1.ALPHA = exports$1.FINISH = exports$1.H_METHOD_MAP = exports$1.METHOD_MAP = exports$1.METHODS_RTSP = exports$1.METHODS_ICE = exports$1.METHODS_HTTP = exports$1.METHODS = exports$1.LENIENT_FLAGS = exports$1.FLAGS = exports$1.TYPE = exports$1.ERROR = void 0;
+	(function (exports) {
+		Object.defineProperty(exports, "__esModule", { value: true });
+		exports.SPECIAL_HEADERS = exports.HEADER_STATE = exports.MINOR = exports.MAJOR = exports.CONNECTION_TOKEN_CHARS = exports.HEADER_CHARS = exports.TOKEN = exports.STRICT_TOKEN = exports.HEX = exports.URL_CHAR = exports.STRICT_URL_CHAR = exports.USERINFO_CHARS = exports.MARK = exports.ALPHANUM = exports.NUM = exports.HEX_MAP = exports.NUM_MAP = exports.ALPHA = exports.FINISH = exports.H_METHOD_MAP = exports.METHOD_MAP = exports.METHODS_RTSP = exports.METHODS_ICE = exports.METHODS_HTTP = exports.METHODS = exports.LENIENT_FLAGS = exports.FLAGS = exports.TYPE = exports.ERROR = void 0;
 		const utils_1 = requireUtils();
 		(function (ERROR) {
 		    ERROR[ERROR["OK"] = 0] = "OK";
@@ -3630,12 +3639,12 @@ function requireConstants$3 () {
 		    ERROR[ERROR["PAUSED_UPGRADE"] = 22] = "PAUSED_UPGRADE";
 		    ERROR[ERROR["PAUSED_H2_UPGRADE"] = 23] = "PAUSED_H2_UPGRADE";
 		    ERROR[ERROR["USER"] = 24] = "USER";
-		})(exports$1.ERROR || (exports$1.ERROR = {}));
+		})(exports.ERROR || (exports.ERROR = {}));
 		(function (TYPE) {
 		    TYPE[TYPE["BOTH"] = 0] = "BOTH";
 		    TYPE[TYPE["REQUEST"] = 1] = "REQUEST";
 		    TYPE[TYPE["RESPONSE"] = 2] = "RESPONSE";
-		})(exports$1.TYPE || (exports$1.TYPE = {}));
+		})(exports.TYPE || (exports.TYPE = {}));
 		(function (FLAGS) {
 		    FLAGS[FLAGS["CONNECTION_KEEP_ALIVE"] = 1] = "CONNECTION_KEEP_ALIVE";
 		    FLAGS[FLAGS["CONNECTION_CLOSE"] = 2] = "CONNECTION_CLOSE";
@@ -3647,12 +3656,12 @@ function requireConstants$3 () {
 		    FLAGS[FLAGS["TRAILING"] = 128] = "TRAILING";
 		    // 1 << 8 is unused
 		    FLAGS[FLAGS["TRANSFER_ENCODING"] = 512] = "TRANSFER_ENCODING";
-		})(exports$1.FLAGS || (exports$1.FLAGS = {}));
+		})(exports.FLAGS || (exports.FLAGS = {}));
 		(function (LENIENT_FLAGS) {
 		    LENIENT_FLAGS[LENIENT_FLAGS["HEADERS"] = 1] = "HEADERS";
 		    LENIENT_FLAGS[LENIENT_FLAGS["CHUNKED_LENGTH"] = 2] = "CHUNKED_LENGTH";
 		    LENIENT_FLAGS[LENIENT_FLAGS["KEEP_ALIVE"] = 4] = "KEEP_ALIVE";
-		})(exports$1.LENIENT_FLAGS || (exports$1.LENIENT_FLAGS = {}));
+		})(exports.LENIENT_FLAGS || (exports.LENIENT_FLAGS = {}));
 		var METHODS;
 		(function (METHODS) {
 		    METHODS[METHODS["DELETE"] = 0] = "DELETE";
@@ -3712,8 +3721,8 @@ function requireConstants$3 () {
 		    METHODS[METHODS["RECORD"] = 44] = "RECORD";
 		    /* RAOP */
 		    METHODS[METHODS["FLUSH"] = 45] = "FLUSH";
-		})(METHODS = exports$1.METHODS || (exports$1.METHODS = {}));
-		exports$1.METHODS_HTTP = [
+		})(METHODS = exports.METHODS || (exports.METHODS = {}));
+		exports.METHODS_HTTP = [
 		    METHODS.DELETE,
 		    METHODS.GET,
 		    METHODS.HEAD,
@@ -3751,10 +3760,10 @@ function requireConstants$3 () {
 		    // TODO(indutny): should we allow it with HTTP?
 		    METHODS.SOURCE,
 		];
-		exports$1.METHODS_ICE = [
+		exports.METHODS_ICE = [
 		    METHODS.SOURCE,
 		];
-		exports$1.METHODS_RTSP = [
+		exports.METHODS_RTSP = [
 		    METHODS.OPTIONS,
 		    METHODS.DESCRIBE,
 		    METHODS.ANNOUNCE,
@@ -3771,59 +3780,59 @@ function requireConstants$3 () {
 		    METHODS.GET,
 		    METHODS.POST,
 		];
-		exports$1.METHOD_MAP = utils_1.enumToMap(METHODS);
-		exports$1.H_METHOD_MAP = {};
-		Object.keys(exports$1.METHOD_MAP).forEach((key) => {
+		exports.METHOD_MAP = utils_1.enumToMap(METHODS);
+		exports.H_METHOD_MAP = {};
+		Object.keys(exports.METHOD_MAP).forEach((key) => {
 		    if (/^H/.test(key)) {
-		        exports$1.H_METHOD_MAP[key] = exports$1.METHOD_MAP[key];
+		        exports.H_METHOD_MAP[key] = exports.METHOD_MAP[key];
 		    }
 		});
 		(function (FINISH) {
 		    FINISH[FINISH["SAFE"] = 0] = "SAFE";
 		    FINISH[FINISH["SAFE_WITH_CB"] = 1] = "SAFE_WITH_CB";
 		    FINISH[FINISH["UNSAFE"] = 2] = "UNSAFE";
-		})(exports$1.FINISH || (exports$1.FINISH = {}));
-		exports$1.ALPHA = [];
+		})(exports.FINISH || (exports.FINISH = {}));
+		exports.ALPHA = [];
 		for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
 		    // Upper case
-		    exports$1.ALPHA.push(String.fromCharCode(i));
+		    exports.ALPHA.push(String.fromCharCode(i));
 		    // Lower case
-		    exports$1.ALPHA.push(String.fromCharCode(i + 0x20));
+		    exports.ALPHA.push(String.fromCharCode(i + 0x20));
 		}
-		exports$1.NUM_MAP = {
+		exports.NUM_MAP = {
 		    0: 0, 1: 1, 2: 2, 3: 3, 4: 4,
 		    5: 5, 6: 6, 7: 7, 8: 8, 9: 9,
 		};
-		exports$1.HEX_MAP = {
+		exports.HEX_MAP = {
 		    0: 0, 1: 1, 2: 2, 3: 3, 4: 4,
 		    5: 5, 6: 6, 7: 7, 8: 8, 9: 9,
 		    A: 0XA, B: 0XB, C: 0XC, D: 0XD, E: 0XE, F: 0XF,
 		    a: 0xa, b: 0xb, c: 0xc, d: 0xd, e: 0xe, f: 0xf,
 		};
-		exports$1.NUM = [
+		exports.NUM = [
 		    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 		];
-		exports$1.ALPHANUM = exports$1.ALPHA.concat(exports$1.NUM);
-		exports$1.MARK = ['-', '_', '.', '!', '~', '*', '\'', '(', ')'];
-		exports$1.USERINFO_CHARS = exports$1.ALPHANUM
-		    .concat(exports$1.MARK)
+		exports.ALPHANUM = exports.ALPHA.concat(exports.NUM);
+		exports.MARK = ['-', '_', '.', '!', '~', '*', '\'', '(', ')'];
+		exports.USERINFO_CHARS = exports.ALPHANUM
+		    .concat(exports.MARK)
 		    .concat(['%', ';', ':', '&', '=', '+', '$', ',']);
 		// TODO(indutny): use RFC
-		exports$1.STRICT_URL_CHAR = [
+		exports.STRICT_URL_CHAR = [
 		    '!', '"', '$', '%', '&', '\'',
 		    '(', ')', '*', '+', ',', '-', '.', '/',
 		    ':', ';', '<', '=', '>',
 		    '@', '[', '\\', ']', '^', '_',
 		    '`',
 		    '{', '|', '}', '~',
-		].concat(exports$1.ALPHANUM);
-		exports$1.URL_CHAR = exports$1.STRICT_URL_CHAR
+		].concat(exports.ALPHANUM);
+		exports.URL_CHAR = exports.STRICT_URL_CHAR
 		    .concat(['\t', '\f']);
 		// All characters with 0x80 bit set to 1
 		for (let i = 0x80; i <= 0xff; i++) {
-		    exports$1.URL_CHAR.push(i);
+		    exports.URL_CHAR.push(i);
 		}
-		exports$1.HEX = exports$1.NUM.concat(['a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F']);
+		exports.HEX = exports.NUM.concat(['a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F']);
 		/* Tokens as defined by rfc 2616. Also lowercases them.
 		 *        token       = 1*<any CHAR except CTLs or separators>
 		 *     separators     = "(" | ")" | "<" | ">" | "@"
@@ -3831,27 +3840,27 @@ function requireConstants$3 () {
 		 *                    | "/" | "[" | "]" | "?" | "="
 		 *                    | "{" | "}" | SP | HT
 		 */
-		exports$1.STRICT_TOKEN = [
+		exports.STRICT_TOKEN = [
 		    '!', '#', '$', '%', '&', '\'',
 		    '*', '+', '-', '.',
 		    '^', '_', '`',
 		    '|', '~',
-		].concat(exports$1.ALPHANUM);
-		exports$1.TOKEN = exports$1.STRICT_TOKEN.concat([' ']);
+		].concat(exports.ALPHANUM);
+		exports.TOKEN = exports.STRICT_TOKEN.concat([' ']);
 		/*
 		 * Verify that a char is a valid visible (printable) US-ASCII
 		 * character or %x80-FF
 		 */
-		exports$1.HEADER_CHARS = ['\t'];
+		exports.HEADER_CHARS = ['\t'];
 		for (let i = 32; i <= 255; i++) {
 		    if (i !== 127) {
-		        exports$1.HEADER_CHARS.push(i);
+		        exports.HEADER_CHARS.push(i);
 		    }
 		}
 		// ',' = \x44
-		exports$1.CONNECTION_TOKEN_CHARS = exports$1.HEADER_CHARS.filter((c) => c !== 44);
-		exports$1.MAJOR = exports$1.NUM_MAP;
-		exports$1.MINOR = exports$1.MAJOR;
+		exports.CONNECTION_TOKEN_CHARS = exports.HEADER_CHARS.filter((c) => c !== 44);
+		exports.MAJOR = exports.NUM_MAP;
+		exports.MINOR = exports.MAJOR;
 		var HEADER_STATE;
 		(function (HEADER_STATE) {
 		    HEADER_STATE[HEADER_STATE["GENERAL"] = 0] = "GENERAL";
@@ -3863,8 +3872,8 @@ function requireConstants$3 () {
 		    HEADER_STATE[HEADER_STATE["CONNECTION_CLOSE"] = 6] = "CONNECTION_CLOSE";
 		    HEADER_STATE[HEADER_STATE["CONNECTION_UPGRADE"] = 7] = "CONNECTION_UPGRADE";
 		    HEADER_STATE[HEADER_STATE["TRANSFER_ENCODING_CHUNKED"] = 8] = "TRANSFER_ENCODING_CHUNKED";
-		})(HEADER_STATE = exports$1.HEADER_STATE || (exports$1.HEADER_STATE = {}));
-		exports$1.SPECIAL_HEADERS = {
+		})(HEADER_STATE = exports.HEADER_STATE || (exports.HEADER_STATE = {}));
+		exports.SPECIAL_HEADERS = {
 		    'connection': HEADER_STATE.CONNECTION,
 		    'content-length': HEADER_STATE.CONTENT_LENGTH,
 		    'proxy-connection': HEADER_STATE.CONNECTION,
@@ -8668,6 +8677,9 @@ function requireClientH1 () {
 	const FastBuffer = Buffer[Symbol.species];
 	const addListener = util.addListener;
 	const removeAllListeners = util.removeAllListeners;
+	const kIdleSocketValidation = Symbol('kIdleSocketValidation');
+	const kIdleSocketValidationTimeout = Symbol('kIdleSocketValidationTimeout');
+	const kSocketUsed = Symbol('kSocketUsed');
 
 	let extractBody;
 
@@ -8755,10 +8767,10 @@ function requireClientH1 () {
 	const TIMEOUT_KEEP_ALIVE = 8 | USE_NATIVE_TIMER;
 
 	class Parser {
-	  constructor (client, socket, { exports: exports$1 }) {
+	  constructor (client, socket, { exports }) {
 	    assert(Number.isFinite(client[kMaxHeadersSize]) && client[kMaxHeadersSize] > 0);
 
-	    this.llhttp = exports$1;
+	    this.llhttp = exports;
 	    this.ptr = this.llhttp.llhttp_alloc(constants.TYPE.RESPONSE);
 	    this.client = client;
 	    this.socket = socket;
@@ -8890,27 +8902,69 @@ function requireClientH1 () {
 
 	      const offset = llhttp.llhttp_get_error_pos(this.ptr) - currentBufferPtr;
 
-	      if (ret === constants.ERROR.PAUSED_UPGRADE) {
-	        this.onUpgrade(data.slice(offset));
-	      } else if (ret === constants.ERROR.PAUSED) {
-	        this.paused = true;
-	        socket.unshift(data.slice(offset));
-	      } else if (ret !== constants.ERROR.OK) {
-	        const ptr = llhttp.llhttp_get_error_reason(this.ptr);
-	        let message = '';
-	        /* istanbul ignore else: difficult to make a test case for */
-	        if (ptr) {
-	          const len = new Uint8Array(llhttp.memory.buffer, ptr).indexOf(0);
-	          message =
-	            'Response does not match the HTTP/1.1 protocol (' +
-	            Buffer.from(llhttp.memory.buffer, ptr, len).toString() +
-	            ')';
+	      if (ret !== constants.ERROR.OK) {
+	        const body = data.subarray(offset);
+
+	        if (ret === constants.ERROR.PAUSED_UPGRADE) {
+	          this.onUpgrade(body);
+	        } else if (ret === constants.ERROR.PAUSED) {
+	          this.paused = true;
+	          socket.unshift(body);
+	        } else {
+	          throw this.createError(ret, body)
 	        }
-	        throw new HTTPParserError(message, constants.ERROR[ret], data.slice(offset))
 	      }
 	    } catch (err) {
 	      util.destroy(socket, err);
 	    }
+	  }
+
+	  finish () {
+	    assert(currentParser === null);
+	    assert(this.ptr != null);
+	    assert(!this.paused);
+
+	    const { llhttp } = this;
+
+	    let ret;
+
+	    try {
+	      currentParser = this;
+	      ret = llhttp.llhttp_finish(this.ptr);
+	    } finally {
+	      currentParser = null;
+	    }
+
+	    if (ret === constants.ERROR.OK) {
+	      return null
+	    }
+
+	    if (ret === constants.ERROR.PAUSED || ret === constants.ERROR.PAUSED_UPGRADE) {
+	      this.paused = true;
+	      return null
+	    }
+
+	    return this.createError(ret, EMPTY_BUF)
+	  }
+
+	  createError (ret, data) {
+	    const { llhttp, contentLength, bytesRead } = this;
+
+	    if (contentLength && bytesRead !== parseInt(contentLength, 10)) {
+	      return new ResponseContentLengthMismatchError()
+	    }
+
+	    const ptr = llhttp.llhttp_get_error_reason(this.ptr);
+	    let message = '';
+	    if (ptr) {
+	      const len = new Uint8Array(llhttp.memory.buffer, ptr).indexOf(0);
+	      message =
+	        'Response does not match the HTTP/1.1 protocol (' +
+	        Buffer.from(llhttp.memory.buffer, ptr, len).toString() +
+	        ')';
+	    }
+
+	    return new HTTPParserError(message, constants.ERROR[ret], data)
 	  }
 
 	  destroy () {
@@ -8937,6 +8991,11 @@ function requireClientH1 () {
 
 	    /* istanbul ignore next: difficult to make a test case for */
 	    if (socket.destroyed) {
+	      return -1
+	    }
+
+	    if (client[kRunning] === 0) {
+	      util.destroy(socket, new SocketError('bad response', util.getSocketInfo(socket)));
 	      return -1
 	    }
 
@@ -9040,6 +9099,11 @@ function requireClientH1 () {
 
 	    /* istanbul ignore next: difficult to make a test case for */
 	    if (socket.destroyed) {
+	      return -1
+	    }
+
+	    if (client[kRunning] === 0) {
+	      util.destroy(socket, new SocketError('bad response', util.getSocketInfo(socket)));
 	      return -1
 	    }
 
@@ -9216,6 +9280,7 @@ function requireClientH1 () {
 	    request.onComplete(headers);
 
 	    client[kQueue][client[kRunningIdx]++] = null;
+	    socket[kSocketUsed] = true;
 
 	    if (socket[kWriting]) {
 	      assert(client[kRunning] === 0);
@@ -9274,6 +9339,9 @@ function requireClientH1 () {
 	  socket[kWriting] = false;
 	  socket[kReset] = false;
 	  socket[kBlocking] = false;
+	  socket[kIdleSocketValidation] = 0;
+	  socket[kIdleSocketValidationTimeout] = null;
+	  socket[kSocketUsed] = false;
 	  socket[kParser] = new Parser(client, socket, llhttpInstance);
 
 	  addListener(socket, 'error', function (err) {
@@ -9284,8 +9352,11 @@ function requireClientH1 () {
 	    // On Mac OS, we get an ECONNRESET even if there is a full body to be forwarded
 	    // to the user.
 	    if (err.code === 'ECONNRESET' && parser.statusCode && !parser.shouldKeepAlive) {
-	      // We treat all incoming data so for as a valid response.
-	      parser.onMessageComplete();
+	      const parserErr = parser.finish();
+	      if (parserErr) {
+	        this[kError] = parserErr;
+	        this[kClient][kOnError](parserErr);
+	      }
 	      return
 	    }
 
@@ -9304,8 +9375,10 @@ function requireClientH1 () {
 	    const parser = this[kParser];
 
 	    if (parser.statusCode && !parser.shouldKeepAlive) {
-	      // We treat all incoming data so far as a valid response.
-	      parser.onMessageComplete();
+	      const parserErr = parser.finish();
+	      if (parserErr) {
+	        util.destroy(this, parserErr);
+	      }
 	      return
 	    }
 
@@ -9315,10 +9388,11 @@ function requireClientH1 () {
 	    const client = this[kClient];
 	    const parser = this[kParser];
 
+	    clearIdleSocketValidation(this);
+
 	    if (parser) {
 	      if (!this[kError] && parser.statusCode && !parser.shouldKeepAlive) {
-	        // We treat all incoming data so far as a valid response.
-	        parser.onMessageComplete();
+	        this[kError] = parser.finish() || this[kError];
 	      }
 
 	      this[kParser].destroy();
@@ -9381,7 +9455,7 @@ function requireClientH1 () {
 	      return socket.destroyed
 	    },
 	    busy (request) {
-	      if (socket[kWriting] || socket[kReset] || socket[kBlocking]) {
+	      if (socket[kWriting] || socket[kReset] || socket[kBlocking] || socket[kIdleSocketValidation] === 1) {
 	        return true
 	      }
 
@@ -9419,6 +9493,31 @@ function requireClientH1 () {
 	  }
 	}
 
+	function clearIdleSocketValidation (socket) {
+	  if (socket[kIdleSocketValidationTimeout]) {
+	    clearTimeout(socket[kIdleSocketValidationTimeout]);
+	    socket[kIdleSocketValidationTimeout] = null;
+	  }
+
+	  socket[kIdleSocketValidation] = 0;
+	}
+
+	function scheduleIdleSocketValidation (client, socket) {
+	  socket[kIdleSocketValidation] = 1;
+	  socket[kIdleSocketValidationTimeout] = setTimeout(() => {
+	    socket[kIdleSocketValidationTimeout] = null;
+	    socket[kIdleSocketValidation] = 2;
+
+	    if (client[kSocket] === socket && !socket.destroyed) {
+	      client[kResume]();
+	    }
+	  }, 0);
+	  socket[kIdleSocketValidationTimeout].unref?.();
+	}
+
+	/**
+	 * @param {import('./client.js')} client
+	 */
 	function resumeH1 (client) {
 	  const socket = client[kSocket];
 
@@ -9431,6 +9530,32 @@ function requireClientH1 () {
 	    } else if (socket[kNoRef] && socket.ref) {
 	      socket.ref();
 	      socket[kNoRef] = false;
+	    }
+
+	    if (client[kRunning] === 0 && client[kPending] > 0 && socket[kSocketUsed]) {
+	      if (socket[kIdleSocketValidation] === 0) {
+	        scheduleIdleSocketValidation(client, socket);
+	        socket[kParser].readMore();
+	        if (socket.destroyed) {
+	          return
+	        }
+	        return
+	      }
+
+	      if (socket[kIdleSocketValidation] === 1) {
+	        socket[kParser].readMore();
+	        if (socket.destroyed) {
+	          return
+	        }
+	        return
+	      }
+	    }
+
+	    if (client[kRunning] === 0) {
+	      socket[kParser].readMore();
+	      if (socket.destroyed) {
+	        return
+	      }
 	    }
 
 	    if (client[kSize] === 0) {
@@ -9526,6 +9651,7 @@ function requireClientH1 () {
 	  }
 
 	  const socket = client[kSocket];
+	  clearIdleSocketValidation(socket);
 
 	  const abort = (err) => {
 	    if (request.aborted || request.completed) {
@@ -11096,9 +11222,10 @@ function requireClient () {
 	    autoSelectFamilyAttemptTimeout,
 	    // h2
 	    maxConcurrentStreams,
-	    allowH2
+	    allowH2,
+	    webSocket
 	  } = {}) {
-	    super();
+	    super({ webSocket });
 
 	    if (keepAlive !== undefined) {
 	      throw new InvalidArgumentError('unsupported keepAlive, use pipelining=0 instead')
@@ -11805,8 +11932,8 @@ function requirePoolBase () {
 	const kStats = Symbol('stats');
 
 	class PoolBase extends DispatcherBase {
-	  constructor () {
-	    super();
+	  constructor (opts) {
+	    super(opts);
 
 	    this[kQueue] = new FixedQueue();
 	    this[kClients] = [];
@@ -12025,8 +12152,6 @@ function requirePool () {
 	    allowH2,
 	    ...options
 	  } = {}) {
-	    super();
-
 	    if (connections != null && (!Number.isFinite(connections) || connections < 0)) {
 	      throw new InvalidArgumentError('invalid connections')
 	    }
@@ -12050,6 +12175,8 @@ function requirePool () {
 	        ...connect
 	      });
 	    }
+
+	    super(options);
 
 	    this[kInterceptors] = options.interceptors?.Pool && Array.isArray(options.interceptors.Pool)
 	      ? options.interceptors.Pool
@@ -12344,8 +12471,6 @@ function requireAgent () {
 
 	class Agent extends DispatcherBase {
 	  constructor ({ factory = defaultFactory, maxRedirections = 0, connect, ...options } = {}) {
-	    super();
-
 	    if (typeof factory !== 'function') {
 	      throw new InvalidArgumentError('factory must be a function.')
 	    }
@@ -12357,6 +12482,8 @@ function requireAgent () {
 	    if (!Number.isInteger(maxRedirections) || maxRedirections < 0) {
 	      throw new InvalidArgumentError('maxRedirections must be a positive number')
 	    }
+
+	    super(options);
 
 	    if (connect && typeof connect !== 'function') {
 	      connect = { ...connect };
@@ -24007,32 +24134,25 @@ function requireParse () {
 	    // If the attribute-name case-insensitively matches the string
 	    // "SameSite", the user agent MUST process the cookie-av as follows:
 
-	    // 1. Let enforcement be "Default".
-	    let enforcement = 'Default';
-
 	    const attributeValueLowercase = attributeValue.toLowerCase();
-	    // 2. If cookie-av's attribute-value is a case-insensitive match for
-	    //    "None", set enforcement to "None".
-	    if (attributeValueLowercase.includes('none')) {
-	      enforcement = 'None';
-	    }
 
-	    // 3. If cookie-av's attribute-value is a case-insensitive match for
-	    //    "Strict", set enforcement to "Strict".
-	    if (attributeValueLowercase.includes('strict')) {
-	      enforcement = 'Strict';
+	    // 1. If cookie-av's attribute-value is a case-insensitive match for
+	    //    "None", append an attribute to the cookie-attribute-list with an
+	    //    attribute-name of "SameSite" and an attribute-value of "None".
+	    if (attributeValueLowercase === 'none') {
+	      cookieAttributeList.sameSite = 'None';
+	    } else if (attributeValueLowercase === 'strict') {
+	      // 2. If cookie-av's attribute-value is a case-insensitive match for
+	      //    "Strict", append an attribute to the cookie-attribute-list with
+	      //    an attribute-name of "SameSite" and an attribute-value of
+	      //    "Strict".
+	      cookieAttributeList.sameSite = 'Strict';
+	    } else if (attributeValueLowercase === 'lax') {
+	      // 3. If cookie-av's attribute-value is a case-insensitive match for
+	      //    "Lax", append an attribute to the cookie-attribute-list with an
+	      //    attribute-name of "SameSite" and an attribute-value of "Lax".
+	      cookieAttributeList.sameSite = 'Lax';
 	    }
-
-	    // 4. If cookie-av's attribute-value is a case-insensitive match for
-	    //    "Lax", set enforcement to "Lax".
-	    if (attributeValueLowercase.includes('lax')) {
-	      enforcement = 'Lax';
-	    }
-
-	    // 5. Append an attribute to the cookie-attribute-list with an
-	    //    attribute-name of "SameSite" and an attribute-value of
-	    //    enforcement.
-	    cookieAttributeList.sameSite = enforcement;
 	  } else {
 	    cookieAttributeList.unparsed ??= [];
 
@@ -25498,40 +25618,35 @@ function requirePermessageDeflate () {
 	const kBuffer = Symbol('kBuffer');
 	const kLength = Symbol('kLength');
 
-	// Default maximum decompressed message size: 4 MB
-	const kDefaultMaxDecompressedSize = 4 * 1024 * 1024;
-
 	class PerMessageDeflate {
 	  /** @type {import('node:zlib').InflateRaw} */
 	  #inflate
 
 	  #options = {}
 
-	  /** @type {boolean} */
-	  #aborted = false
-
-	  /** @type {Function|null} */
-	  #currentCallback = null
+	  #maxPayloadSize = 0
 
 	  /**
 	   * @param {Map<string, string>} extensions
 	   */
-	  constructor (extensions) {
+	  constructor (extensions, options) {
 	    this.#options.serverNoContextTakeover = extensions.has('server_no_context_takeover');
 	    this.#options.serverMaxWindowBits = extensions.get('server_max_window_bits');
+
+	    this.#maxPayloadSize = options.maxPayloadSize;
 	  }
 
+	  /**
+	   * Decompress a compressed payload.
+	   * @param {Buffer} chunk Compressed data
+	   * @param {boolean} fin Final fragment flag
+	   * @param {Function} callback Callback function
+	   */
 	  decompress (chunk, fin, callback) {
 	    // An endpoint uses the following algorithm to decompress a message.
 	    // 1.  Append 4 octets of 0x00 0x00 0xff 0xff to the tail end of the
 	    //     payload of the message.
 	    // 2.  Decompress the resulting data using DEFLATE.
-
-	    if (this.#aborted) {
-	      callback(new MessageSizeExceededError());
-	      return
-	    }
-
 	    if (!this.#inflate) {
 	      let windowBits = Z_DEFAULT_WINDOWBITS;
 
@@ -25554,23 +25669,12 @@ function requirePermessageDeflate () {
 	      this.#inflate[kLength] = 0;
 
 	      this.#inflate.on('data', (data) => {
-	        if (this.#aborted) {
-	          return
-	        }
-
 	        this.#inflate[kLength] += data.length;
 
-	        if (this.#inflate[kLength] > kDefaultMaxDecompressedSize) {
-	          this.#aborted = true;
+	        if (this.#maxPayloadSize > 0 && this.#inflate[kLength] > this.#maxPayloadSize) {
+	          callback(new MessageSizeExceededError());
 	          this.#inflate.removeAllListeners();
-	          this.#inflate.destroy();
 	          this.#inflate = null;
-
-	          if (this.#currentCallback) {
-	            const cb = this.#currentCallback;
-	            this.#currentCallback = null;
-	            cb(new MessageSizeExceededError());
-	          }
 	          return
 	        }
 
@@ -25583,14 +25687,13 @@ function requirePermessageDeflate () {
 	      });
 	    }
 
-	    this.#currentCallback = callback;
 	    this.#inflate.write(chunk);
 	    if (fin) {
 	      this.#inflate.write(tail);
 	    }
 
 	    this.#inflate.flush(() => {
-	      if (this.#aborted || !this.#inflate) {
+	      if (!this.#inflate) {
 	        return
 	      }
 
@@ -25598,7 +25701,6 @@ function requirePermessageDeflate () {
 
 	      this.#inflate[kBuffer].length = 0;
 	      this.#inflate[kLength] = 0;
-	      this.#currentCallback = null;
 
 	      callback(null, full);
 	    });
@@ -25634,6 +25736,12 @@ function requireReceiver () {
 	const { WebsocketFrameSend } = requireFrame();
 	const { closeWebSocketConnection } = requireConnection();
 	const { PerMessageDeflate } = requirePermessageDeflate();
+	const { MessageSizeExceededError } = requireErrors();
+
+	function failWebsocketConnectionWithCode (ws, code, reason) {
+	  closeWebSocketConnection(ws, code, reason, Buffer.byteLength(reason));
+	  failWebsocketConnection(ws, reason);
+	}
 
 	// This code was influenced by ws released under the MIT license.
 	// Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>
@@ -25642,6 +25750,7 @@ function requireReceiver () {
 
 	class ByteParser extends Writable {
 	  #buffers = []
+	  #fragmentsBytes = 0
 	  #byteOffset = 0
 	  #loop = false
 
@@ -25653,18 +25762,27 @@ function requireReceiver () {
 	  /** @type {Map<string, PerMessageDeflate>} */
 	  #extensions
 
+	  /** @type {number} */
+	  #maxFragments
+
+	  /** @type {number} */
+	  #maxPayloadSize
+
 	  /**
 	   * @param {import('./websocket').WebSocket} ws
 	   * @param {Map<string, string>|null} extensions
+	   * @param {{ maxFragments?: number, maxPayloadSize?: number }} [options]
 	   */
-	  constructor (ws, extensions) {
+	  constructor (ws, extensions, options = {}) {
 	    super();
 
 	    this.ws = ws;
 	    this.#extensions = extensions == null ? new Map() : extensions;
+	    this.#maxFragments = options.maxFragments ?? 0;
+	    this.#maxPayloadSize = options.maxPayloadSize ?? 0;
 
 	    if (this.#extensions.has('permessage-deflate')) {
-	      this.#extensions.set('permessage-deflate', new PerMessageDeflate(extensions));
+	      this.#extensions.set('permessage-deflate', new PerMessageDeflate(extensions, options));
 	    }
 	  }
 
@@ -25678,6 +25796,19 @@ function requireReceiver () {
 	    this.#loop = true;
 
 	    this.run(callback);
+	  }
+
+	  #validatePayloadLength () {
+	    if (
+	      this.#maxPayloadSize > 0 &&
+	      !isControlFrame(this.#info.opcode) &&
+	      this.#info.payloadLength + this.#fragmentsBytes > this.#maxPayloadSize
+	    ) {
+	      failWebsocketConnectionWithCode(this.ws, 1009, 'Payload size exceeds maximum allowed size');
+	      return false
+	    }
+
+	    return true
 	  }
 
 	  /**
@@ -25768,6 +25899,10 @@ function requireReceiver () {
 	        if (payloadLength <= 125) {
 	          this.#info.payloadLength = payloadLength;
 	          this.#state = parserStates.READ_DATA;
+
+	          if (!this.#validatePayloadLength()) {
+	            return
+	          }
 	        } else if (payloadLength === 126) {
 	          this.#state = parserStates.PAYLOADLENGTH_16;
 	        } else if (payloadLength === 127) {
@@ -25792,6 +25927,10 @@ function requireReceiver () {
 
 	        this.#info.payloadLength = buffer.readUInt16BE(0);
 	        this.#state = parserStates.READ_DATA;
+
+	        if (!this.#validatePayloadLength()) {
+	          return
+	        }
 	      } else if (this.#state === parserStates.PAYLOADLENGTH_64) {
 	        if (this.#byteOffset < 8) {
 	          return callback()
@@ -25814,6 +25953,10 @@ function requireReceiver () {
 
 	        this.#info.payloadLength = lower;
 	        this.#state = parserStates.READ_DATA;
+
+	        if (!this.#validatePayloadLength()) {
+	          return
+	        }
 	      } else if (this.#state === parserStates.READ_DATA) {
 	        if (this.#byteOffset < this.#info.payloadLength) {
 	          return callback()
@@ -25826,42 +25969,58 @@ function requireReceiver () {
 	          this.#state = parserStates.INFO;
 	        } else {
 	          if (!this.#info.compressed) {
-	            this.#fragments.push(body);
+	            if (!this.writeFragments(body)) {
+	              return
+	            }
+
+	            if (this.#maxPayloadSize > 0 && this.#fragmentsBytes > this.#maxPayloadSize) {
+	              failWebsocketConnectionWithCode(this.ws, 1009, new MessageSizeExceededError().message);
+	              return
+	            }
 
 	            // If the frame is not fragmented, a message has been received.
 	            // If the frame is fragmented, it will terminate with a fin bit set
 	            // and an opcode of 0 (continuation), therefore we handle that when
 	            // parsing continuation frames, not here.
 	            if (!this.#info.fragmented && this.#info.fin) {
-	              const fullMessage = Buffer.concat(this.#fragments);
-	              websocketMessageReceived(this.ws, this.#info.binaryType, fullMessage);
-	              this.#fragments.length = 0;
+	              websocketMessageReceived(this.ws, this.#info.binaryType, this.consumeFragments());
 	            }
 
 	            this.#state = parserStates.INFO;
 	          } else {
-	            this.#extensions.get('permessage-deflate').decompress(body, this.#info.fin, (error, data) => {
-	              if (error) {
-	                failWebsocketConnection(this.ws, error.message);
-	                return
-	              }
+	            this.#extensions.get('permessage-deflate').decompress(
+	              body,
+	              this.#info.fin,
+	              (error, data) => {
+	                if (error) {
+	                  const code = error instanceof MessageSizeExceededError ? 1009 : 1007;
+	                  failWebsocketConnectionWithCode(this.ws, code, error.message);
+	                  return
+	                }
 
-	              this.#fragments.push(data);
+	                if (!this.writeFragments(data)) {
+	                  return
+	                }
 
-	              if (!this.#info.fin) {
-	                this.#state = parserStates.INFO;
+	                if (this.#maxPayloadSize > 0 && this.#fragmentsBytes > this.#maxPayloadSize) {
+	                  failWebsocketConnectionWithCode(this.ws, 1009, new MessageSizeExceededError().message);
+	                  return
+	                }
+
+	                if (!this.#info.fin) {
+	                  this.#state = parserStates.INFO;
+	                  this.#loop = true;
+	                  this.run(callback);
+	                  return
+	                }
+
+	                websocketMessageReceived(this.ws, this.#info.binaryType, this.consumeFragments());
+
 	                this.#loop = true;
+	                this.#state = parserStates.INFO;
 	                this.run(callback);
-	                return
 	              }
-
-	              websocketMessageReceived(this.ws, this.#info.binaryType, Buffer.concat(this.#fragments));
-
-	              this.#loop = true;
-	              this.#state = parserStates.INFO;
-	              this.#fragments.length = 0;
-	              this.run(callback);
-	            });
+	            );
 
 	            this.#loop = false;
 	            break
@@ -25911,6 +26070,35 @@ function requireReceiver () {
 	    this.#byteOffset -= n;
 
 	    return buffer
+	  }
+
+	  writeFragments (fragment) {
+	    if (
+	      this.#maxFragments > 0 &&
+	      this.#fragments.length === this.#maxFragments
+	    ) {
+	      failWebsocketConnectionWithCode(this.ws, 1008, 'Too many message fragments');
+	      return false
+	    }
+
+	    this.#fragmentsBytes += fragment.length;
+	    this.#fragments.push(fragment);
+	    return true
+	  }
+
+	  consumeFragments () {
+	    const fragments = this.#fragments;
+
+	    if (fragments.length === 1) {
+	      this.#fragmentsBytes = 0;
+	      return fragments.shift()
+	    }
+
+	    const output = Buffer.concat(fragments, this.#fragmentsBytes);
+	    this.#fragments = [];
+	    this.#fragmentsBytes = 0;
+
+	    return output
 	  }
 
 	  parseCloseBody (data) {
@@ -26598,7 +26786,14 @@ function requireWebsocket () {
 	    // once this happens, the connection is open
 	    this[kResponse] = response;
 
-	    const parser = new ByteParser(this, parsedExtensions);
+	    const webSocketOptions = this[kController]?.dispatcher?.webSocketOptions;
+	    const maxFragments = webSocketOptions?.maxFragments;
+	    const maxPayloadSize = webSocketOptions?.maxPayloadSize;
+
+	    const parser = new ByteParser(this, parsedExtensions, {
+	      maxFragments,
+	      maxPayloadSize
+	    });
 	    parser.on('drain', onParserDrain);
 	    parser.on('error', onParserError.bind(this));
 
@@ -29041,6 +29236,19 @@ function getProxyFetch(destinationUrl) {
 }
 function getApiBaseUrl() {
     return process.env['GITHUB_API_URL'] || 'https://api.github.com';
+}
+function getUserAgentWithOrchestrationId(baseUserAgent) {
+    var _a;
+    const orchId = (_a = process.env['ACTIONS_ORCHESTRATION_ID']) === null || _a === void 0 ? void 0 : _a.trim();
+    if (orchId) {
+        const sanitizedId = orchId.replace(/[^a-z0-9_.-]/gi, '_');
+        const tag = `actions_orchestration_id/${sanitizedId}`;
+        if (baseUserAgent === null || baseUserAgent === void 0 ? void 0 : baseUserAgent.includes(tag))
+            return baseUserAgent;
+        const ua = baseUserAgent ? `${baseUserAgent} ` : '';
+        return `${ua}${tag}`;
+    }
+    return baseUserAgent;
 }
 
 function getUserAgent() {
@@ -32960,6 +33168,11 @@ function getOctokitOptions(token, options) {
     if (auth) {
         opts.auth = auth;
     }
+    // Orchestration ID
+    const userAgent = getUserAgentWithOrchestrationId(opts.userAgent);
+    if (userAgent) {
+        opts.userAgent = userAgent;
+    }
     return opts;
 }
 
@@ -33384,85 +33597,89 @@ function requireMd5 () {
 var md5Exports = requireMd5();
 var md5 = /*@__PURE__*/getDefaultExportFromCjs(md5Exports);
 
-var b=(u=>(u.DAILY="DAILY",u.HOURLY="HOURLY",u.MINUTELY="MINUTELY",u.MONTHLY="MONTHLY",u.SECONDLY="SECONDLY",u.WEEKLY="WEEKLY",u.YEARLY="YEARLY",u))(b||{}),A=(u=>(u.FR="FR",u.MO="MO",u.SA="SA",u.SU="SU",u.TH="TH",u.TU="TU",u.WE="WE",u))(A||{});function l(a,t,e){if(Array.isArray(t))a.x=t.map(n=>{if(Array.isArray(n))return n;if(typeof n.key!="string"||typeof n.value!="string")throw new Error("Either key or value is not a string!");if(n.key.substr(0,2)!=="X-")throw new Error("Key has to start with `X-`!");return [n.key,n.value]});else if(typeof t=="object")a.x=Object.entries(t).map(([n,i])=>{if(typeof n!="string"||typeof i!="string")throw new Error("Either key or value is not a string!");if(n.substr(0,2)!=="X-")throw new Error("Key has to start with `X-`!");return [n,i]});else if(typeof t=="string"&&typeof e=="string"){if(t.substr(0,2)!=="X-")throw new Error("Key has to start with `X-`!");a.x.push([t,e]);}else return a.x.map(n=>({key:n[0],value:n[1]}))}function h(a,t){if(a instanceof Date&&isNaN(a.getTime())||typeof a=="string"&&isNaN(new Date(a).getTime()))throw new Error(`\`${t}\` has to be a valid date!`);if(a instanceof Date||typeof a=="string"||S(a)&&a.isValid===true||(R(a)||G(a))&&a.isValid())return a;throw new Error(`\`${t}\` has to be a valid date!`)}function o(a,t){let e=Object.values(a),n=String(t).toUpperCase();if(!n||!e.includes(n))throw new Error(`Input must be one of the following: ${e.join(", ")}`);return n}function p(a,t){let e=null;if(typeof t=="string"){let n=t.match(/^(.+) ?<([^>]+)>$/);n?e={email:n[2].trim(),name:n[1].trim()}:t.includes("@")&&(e={email:t.trim(),name:t.trim()});}else typeof t=="object"&&(e={email:t.email,mailto:t.mailto,name:t.name,sentBy:t.sentBy});if(!e&&typeof t=="string")throw new Error("`"+a+"` isn't formated correctly. See https://sebbo2002.github.io/ical-generator/develop/reference/interfaces/ICalOrganizer.html");if(!e)throw new Error("`"+a+"` needs to be a valid formed string or an object. See https://sebbo2002.github.io/ical-generator/develop/reference/interfaces/ICalOrganizer.html");if(!e.name)throw new Error("`"+a+".name` is empty!");if(!e.email)throw new Error("`"+a+".email` is empty!");return e}function r(a,t){return String(a).replace(t?/[\\"]/g:/[\\;,]/g,function(e){return "\\"+e}).replace(/(?:\r\n|\r|\n)/g,"\\n")}function N(a){return a.split(`\r
-`).map(function(t){let e="",n=0;for(let i=0;i<t.length;i++){let s=t.charAt(i);s>="\uD800"&&s<="\uDBFF"&&(s+=t.charAt(++i));let F=new TextEncoder().encode(s).length;n+=F,n>74&&(e+=`\r
- `,n=F),e+=s;}return e}).join(`\r
-`)}function d(a,t,e,n){if(a?.startsWith("/")&&(a=a.substr(1)),typeof t=="string"||t instanceof Date){let i=H(t)?t.withTimeZone(a):new Date(t),s=i.getUTCFullYear()+String(i.getUTCMonth()+1).padStart(2,"0")+i.getUTCDate().toString().padStart(2,"0");return a&&(s=i.getFullYear()+String(i.getMonth()+1).padStart(2,"0")+i.getDate().toString().padStart(2,"0")),e?s:a?(s+="T"+i.getHours().toString().padStart(2,"0")+i.getMinutes().toString().padStart(2,"0")+i.getSeconds().toString().padStart(2,"0"),s):(s+="T"+i.getUTCHours().toString().padStart(2,"0")+i.getUTCMinutes().toString().padStart(2,"0")+i.getUTCSeconds().toString().padStart(2,"0")+(n?"":"Z"),s)}else if(R(t)){let i=a?k(t)&&!t.tz()?t.clone().tz(a):t:n||e&&k(t)&&t.tz()?t:t.utc();return i.format("YYYYMMDD")+(e?"":"T"+i.format("HHmmss")+(n||a?"":"Z"))}else if(S(t)){let i=a?t.setZone(a):n||e&&t.zone.type!=="system"?t:t.setZone("utc");return i.toFormat("yyyyLLdd")+(e?"":"T"+i.toFormat("HHmmss")+(n||a?"":"Z"))}else {let i=t;if(a)i=typeof t.tz=="function"?t.tz(a):t;else if(!n)if(typeof t.utc=="function")i=t.utc();else throw new Error("Unable to convert dayjs object to UTC value: UTC plugin is not available!");return i.format("YYYYMMDD")+(e?"":"T"+i.format("HHmmss")+(n||a?"":"Z"))}}function E(a,t,e,n){let i="",s=n?.floating||false;return n?.timezone&&(i=";TZID="+n.timezone,s=true),t+i+":"+d(a,e,false,s)}function D(a){let t=a.x.map(([e,n])=>e.toUpperCase()+":"+r(n,false)).join(`\r
+let e=function(e){return e.DAILY=`DAILY`,e.HOURLY=`HOURLY`,e.MINUTELY=`MINUTELY`,e.MONTHLY=`MONTHLY`,e.SECONDLY=`SECONDLY`,e.WEEKLY=`WEEKLY`,e.YEARLY=`YEARLY`,e}({});(function(e){return e.AUTOMATIC=`AUTOMATIC`,e.DISABLED=`DISABLED`,e.ENABLED=`ENABLED`,e})({});(function(e){return e.BICYCLE=`BICYCLE`,e.CAR=`CAR`,e.TRANSIT=`TRANSIT`,e.WALKING=`WALKING`,e})({});let r=function(e){return e.FR=`FR`,e.MO=`MO`,e.SA=`SA`,e.SU=`SU`,e.TH=`TH`,e.TU=`TU`,e.WE=`WE`,e}({});function i(e,t,n){if(Array.isArray(t))e.x=t.map(e=>{if(Array.isArray(e))return e;if(typeof e.key!=`string`||typeof e.value!=`string`)throw Error(`Either key or value is not a string!`);if(e.key.substr(0,2)!==`X-`)throw Error("Key has to start with `X-`!");return [e.key,e.value]});else if(typeof t==`object`)e.x=Object.entries(t).map(([e,t])=>{if(typeof e!=`string`||typeof t!=`string`)throw Error(`Either key or value is not a string!`);if(e.substr(0,2)!==`X-`)throw Error("Key has to start with `X-`!");return [e,t]});else if(typeof t==`string`&&typeof n==`string`){if(t.substr(0,2)!==`X-`)throw Error("Key has to start with `X-`!");e.x.push([t,n]);}else return e.x.map(e=>({key:e[0],value:e[1]}))}function a(e,t){if(e instanceof Date&&isNaN(e.getTime())||typeof e==`string`&&isNaN(new Date(e).getTime()))throw Error(`\`${t}\` has to be a valid date!`);if(e instanceof Date||typeof e==`string`||typeof e==`object`&&e&&(C(e)||S(e)||x(e)||b(e))||m(e)&&e.isValid===true||(h(e)||p(e))&&e.isValid())return e;throw Error(`\`${t}\` has to be a valid date!`)}function o(e,t){let n=Object.values(e),r=String(t).toUpperCase();if(!r||!n.includes(r))throw Error(`Input must be one of the following: ${n.join(`, `)}`);return r}function s(e,t){let n=null;if(typeof t==`string`){let e=t.match(/^(.+) ?<([^>]+)>$/);e?n={email:e[2].trim(),name:e[1].trim()}:t.includes(`@`)&&(n={email:t.trim(),name:t.trim()});}else typeof t==`object`&&(n={email:t.email,mailto:t.mailto,name:t.name,sentBy:t.sentBy});if(!n&&typeof t==`string`)throw Error("`"+e+"` isn't formated correctly. See https://sebbo2002.github.io/ical-generator/develop/reference/interfaces/ICalOrganizer.html");if(!n)throw Error("`"+e+"` needs to be a valid formed string or an object. See https://sebbo2002.github.io/ical-generator/develop/reference/interfaces/ICalOrganizer.html");if(!n.name)throw Error("`"+e+".name` is empty!");if(!n.email)throw Error("`"+e+".email` is empty!");return n}function c(e,t){return String(e).replace(t?/"/g:/[\\;,]/g,function(e){return t?``:`\\`+e}).replace(/(?:\r\n|\r|\n)/g,`\\n`)}function l(e){return e.split(`\r
+`).map(function(e){let t=``,n=0;for(let r=0;r<e.length;r++){let i=e.charAt(r);i>=`\ud800`&&i<=`\udbff`&&(i+=e.charAt(++r));let a=new TextEncoder().encode(i).length;n+=a,n>74&&(t+=`\r
+ `,n=a),t+=i;}return t}).join(`\r
+`)}function u(e,t,n,r){if(e?.startsWith(`/`)&&(e=e.substr(1)),typeof t==`string`||t instanceof Date){let i=w(t)?t.withTimeZone(e):new Date(t),a=i.getUTCFullYear().toString().padStart(4,`0`)+String(i.getUTCMonth()+1).padStart(2,`0`)+i.getUTCDate().toString().padStart(2,`0`);return e&&(a=i.getFullYear().toString().padStart(2,`0`)+String(i.getMonth()+1).padStart(2,`0`)+i.getDate().toString().padStart(2,`0`)),n?a:e?(a+=`T`+i.getHours().toString().padStart(2,`0`)+i.getMinutes().toString().padStart(2,`0`)+i.getSeconds().toString().padStart(2,`0`),a):(a+=`T`+i.getUTCHours().toString().padStart(2,`0`)+i.getUTCMinutes().toString().padStart(2,`0`)+i.getUTCSeconds().toString().padStart(2,`0`)+(r?``:`Z`),a)}else if(h(t)){let i=e?_(t)&&!t.tz()?t.clone().tz(e):t:r||n&&_(t)&&t.tz()?t:t.utc();return i.format(`YYYYMMDD`)+(n?``:`T`+i.format(`HHmmss`)+(r||e?``:`Z`))}else if(m(t)){let i=e?t.setZone(e):r||n&&t.zone.type!==`system`?t:t.setZone(`utc`);return i.toFormat(`yyyyLLdd`)+(n?``:`T`+i.toFormat(`HHmmss`)+(r||e?``:`Z`))}else if(C(t)){let i=t;return e&&(i=t.withTimeZone(t.timeZoneId)),!e&&t.timeZoneId!==`UTC`&&(i=t.withTimeZone(`UTC`)),u(null,i.toPlainDateTime(),n,r||!!e)}else if(S(t)){if(n)return t.year.toString().padStart(4,`0`)+t.month.toString().padStart(2,`0`)+t.day.toString().padStart(2,`0`);if(e){let i=t.toZonedDateTime(e);return u(e,i,n,r)}return t.year.toString().padStart(4,`0`)+t.month.toString().padStart(2,`0`)+t.day.toString().padStart(2,`0`)+`T`+t.hour.toString().padStart(2,`0`)+t.minute.toString().padStart(2,`0`)+t.second.toString().padStart(2,`0`)+(r||e?``:`Z`)}else if(x(t))return t.year.toString().padStart(4,`0`)+t.month.toString().padStart(2,`0`)+t.day.toString().padStart(2,`0`)+(n?``:`T000000`+(r||e?``:`Z`));else if(b(t)){let i=e||`UTC`,a=t.toZonedDateTimeISO(i);return u(e,a,n,r)}else {let i=t;if(e)i=typeof t.tz==`function`?t.tz(e):t;else if(!r)if(typeof t.utc==`function`)i=t.utc();else throw Error(`Unable to convert dayjs object to UTC value: UTC plugin is not available!`);return i.format(`YYYYMMDD`)+(n?``:`T`+i.format(`HHmmss`)+(r||e?``:`Z`))}}function d(e,t,n,r){let i=``,a=r?.floating||false;return r?.timezone&&(i=`;TZID=`+r.timezone,a=true),t+i+`:`+u(e,n,false,a)}function f(e){let t=e.x.map(([e,t])=>e.toUpperCase()+`:`+c(t,false)).join(`\r
 `);return t.length?t+`\r
-`:""}function G(a){return typeof a=="object"&&a!==null&&!(a instanceof Date)&&!R(a)&&!S(a)}function S(a){return typeof a=="object"&&a!==null&&"toJSDate"in a&&typeof a.toJSDate=="function"}function R(a){return a!=null&&a._isAMomentObject!=null}function J(a){return a!==null&&typeof a=="object"&&"asSeconds"in a&&typeof a.asSeconds=="function"}function k(a){return R(a)&&"tz"in a&&typeof a.tz=="function"}function x(a){return a!==null&&typeof a=="object"&&"between"in a&&typeof a.between=="function"&&typeof a.toString=="function"}function H(a){return a instanceof Date&&"internal"in a&&a.internal instanceof Date&&"withTimeZone"in a&&typeof a.withTimeZone=="function"&&"tzComponents"in a&&typeof a.tzComponents=="function"}function v(a){return typeof a=="string"||a instanceof Date?new Date(a):S(a)?a.toJSDate():a.toDate()}function C(a){let t="";return a<0&&(t="-",a*=-1),t+="P",a>=86400&&(t+=Math.floor(a/86400)+"D",a%=86400),!a&&t.length>1||(t+="T",a>=3600&&(t+=Math.floor(a/3600)+"H",a%=3600),a>=60&&(t+=Math.floor(a/60)+"M",a%=60),a>0?t+=a+"S":t.length<=2&&(t+="0S")),t}function g(a){return a?typeof a=="string"?a:a.toJSON():null}var O=(i=>(i.CHAIR="CHAIR",i.NON="NON-PARTICIPANT",i.OPT="OPT-PARTICIPANT",i.REQ="REQ-PARTICIPANT",i))(O||{}),Y=(n=>(n.CLIENT="CLIENT",n.NONE="NONE",n.SERVER="SERVER",n))(Y||{}),w=(s=>(s.ACCEPTED="ACCEPTED",s.DECLINED="DECLINED",s.DELEGATED="DELEGATED",s.NEEDSACTION="NEEDS-ACTION",s.TENTATIVE="TENTATIVE",s))(w||{}),M=(s=>(s.GROUP="GROUP",s.INDIVIDUAL="INDIVIDUAL",s.RESOURCE="RESOURCE",s.ROOM="ROOM",s.UNKNOWN="UNKNOWN",s))(M||{}),f=class a{data;parent;constructor(t,e){if(this.data={delegatedFrom:null,delegatedTo:null,email:"",mailto:null,name:null,role:"REQ-PARTICIPANT",rsvp:null,scheduleAgent:null,sentBy:null,status:null,type:null,x:[]},this.parent=e,!this.parent)throw new Error("`event` option required!");if(!t.email)throw new Error("No value for `email` in ICalAttendee given!");t.name!==void 0&&this.name(t.name),t.email!==void 0&&this.email(t.email),t.mailto!==void 0&&this.mailto(t.mailto),t.sentBy!==void 0&&this.sentBy(t.sentBy),t.status!==void 0&&this.status(t.status),t.role!==void 0&&this.role(t.role),t.rsvp!==void 0&&this.rsvp(t.rsvp),t.type!==void 0&&this.type(t.type),t.delegatedTo!==void 0&&this.delegatedTo(t.delegatedTo),t.delegatedFrom!==void 0&&this.delegatedFrom(t.delegatedFrom),t.delegatesTo&&this.delegatesTo(t.delegatesTo),t.delegatesFrom&&this.delegatesFrom(t.delegatesFrom),t.scheduleAgent!==void 0&&this.scheduleAgent(t.scheduleAgent),t.x!==void 0&&this.x(t.x);}delegatedFrom(t){return t===void 0?this.data.delegatedFrom:(t?typeof t=="string"?this.data.delegatedFrom=new a(p("delegatedFrom",t),this.parent):t instanceof a?this.data.delegatedFrom=t:this.data.delegatedFrom=new a(t,this.parent):this.data.delegatedFrom=null,this)}delegatedTo(t){return t===void 0?this.data.delegatedTo:t?(typeof t=="string"?this.data.delegatedTo=new a(p("delegatedTo",t),this.parent):t instanceof a?this.data.delegatedTo=t:this.data.delegatedTo=new a(t,this.parent),this.data.status="DELEGATED",this):(this.data.delegatedTo=null,this.data.status==="DELEGATED"&&(this.data.status=null),this)}delegatesFrom(t){let e=t instanceof a?t:this.parent.createAttendee(t);return this.delegatedFrom(e),e.delegatedTo(this),e}delegatesTo(t){let e=t instanceof a?t:this.parent.createAttendee(t);return this.delegatedTo(e),e.delegatedFrom(this),e}email(t){return t?(this.data.email=t,this):this.data.email}mailto(t){return t===void 0?this.data.mailto:(this.data.mailto=t||null,this)}name(t){return t===void 0?this.data.name:(this.data.name=t||null,this)}role(t){return t===void 0?this.data.role:(this.data.role=o(O,t),this)}rsvp(t){return t===void 0?this.data.rsvp:t===null?(this.data.rsvp=null,this):(this.data.rsvp=!!t,this)}scheduleAgent(t){return t===void 0?this.data.scheduleAgent:t?typeof t=="string"&&t.toUpperCase().startsWith("X-")?(this.data.scheduleAgent=t,this):(this.data.scheduleAgent=o(Y,t),this):(this.data.scheduleAgent=null,this)}sentBy(t){return t?(this.data.sentBy=t,this):this.data.sentBy}status(t){return t===void 0?this.data.status:t?(this.data.status=o(w,t),this):(this.data.status=null,this)}toJSON(){return Object.assign({},this.data,{delegatedFrom:this.data.delegatedFrom?.email()||null,delegatedTo:this.data.delegatedTo?.email()||null,x:this.x()})}toString(){let t="ATTENDEE";if(!this.data.email)throw new Error("No value for `email` in ICalAttendee given!");return t+=";ROLE="+this.data.role,this.data.type&&(t+=";CUTYPE="+this.data.type),this.data.status&&(t+=";PARTSTAT="+this.data.status),this.data.rsvp!==null&&(t+=";RSVP="+this.data.rsvp.toString().toUpperCase()),this.data.sentBy!==null&&(t+=';SENT-BY="mailto:'+this.data.sentBy+'"'),this.data.delegatedTo&&(t+=';DELEGATED-TO="'+this.data.delegatedTo.email()+'"'),this.data.delegatedFrom&&(t+=';DELEGATED-FROM="'+this.data.delegatedFrom.email()+'"'),this.data.name&&(t+=';CN="'+r(this.data.name,true)+'"'),this.data.email&&this.data.mailto&&(t+=";EMAIL="+r(this.data.email,false)),this.data.scheduleAgent&&(t+=";SCHEDULE-AGENT="+this.data.scheduleAgent),this.data.x.length&&(t+=";"+this.data.x.map(([e,n])=>e.toUpperCase()+"="+r(n,false)).join(";")),t+=":MAILTO:"+r(this.data.mailto||this.data.email,false)+`\r
-`,t}type(t){return t===void 0?this.data.type:t?(this.data.type=o(M,t),this):(this.data.type=null,this)}x(t,e){if(t===void 0)return l(this.data);if(typeof t=="string"&&typeof e=="string")l(this.data,t,e);else if(typeof t=="object")l(this.data,t);else throw new Error("Either key or value is not a string!");return this}};var V=(n=>(n.audio="audio",n.display="display",n.email="email",n))(V||{}),j={end:"END",start:"START"},I=class{data;event;constructor(t,e){if(this.data={attach:null,attendees:[],description:null,interval:null,relatesTo:null,repeat:null,summary:null,trigger:-600,type:"display",x:[]},this.event=e,!e)throw new Error("`event` option required!");t.type!==void 0&&this.type(t.type),"trigger"in t&&t.trigger!==void 0&&this.trigger(t.trigger),"triggerBefore"in t&&t.triggerBefore!==void 0&&this.triggerBefore(t.triggerBefore),"triggerAfter"in t&&t.triggerAfter!==void 0&&this.triggerAfter(t.triggerAfter),t.repeat&&this.repeat(t.repeat),t.attach!==void 0&&this.attach(t.attach),t.description!==void 0&&this.description(t.description),t.summary!==void 0&&this.summary(t.summary),t.attendees!==void 0&&this.attendees(t.attendees),t.x!==void 0&&this.x(t.x);}attach(t){if(t===void 0)return this.data.attach;if(!t)return this.data.attach=null,this;let e=null;if(typeof t=="string")e={mime:null,uri:t};else if(typeof t=="object")e={mime:t.mime||null,uri:t.uri};else throw new Error("`attachment` needs to be a valid formed string or an object. See https://sebbo2002.github.io/ical-generator/develop/reference/classes/ICalAlarm.html#attach");if(!e.uri)throw new Error("`attach.uri` is empty!");return this.data.attach={mime:e.mime,uri:e.uri},this}attendees(t){return t?(t.forEach(e=>this.createAttendee(e)),this):this.data.attendees}createAttendee(t){if(t instanceof f)return this.data.attendees.push(t),t;typeof t=="string"&&(t=p("data",t));let e=new f(t,this);return this.data.attendees.push(e),e}description(t){return t===void 0?this.data.description:t?(this.data.description=t,this):(this.data.description=null,this)}relatesTo(t){if(t===void 0)return this.data.relatesTo;if(!t)return this.data.relatesTo=null,this;if(!Object.values(j).includes(t))throw new Error("`relatesTo` is not correct, must be either `START` or `END`!");return this.data.relatesTo=t,this}repeat(t){if(t===void 0)return this.data.repeat;if(!t)return this.data.repeat=null,this;if(typeof t!="object")throw new Error("`repeat` is not correct, must be an object!");if(typeof t.times!="number"||!isFinite(t.times))throw new Error("`repeat.times` is not correct, must be numeric!");if(typeof t.interval!="number"||!isFinite(t.interval))throw new Error("`repeat.interval` is not correct, must be numeric!");return this.data.repeat=t,this}summary(t){return t===void 0?this.data.summary:t?(this.data.summary=t,this):(this.data.summary=null,this)}toJSON(){let t=this.trigger();return Object.assign({},this.data,{trigger:typeof t=="number"?t:g(t),x:this.x()})}toString(){let t=`BEGIN:VALARM\r
-`;if(t+="ACTION:"+this.data.type.toUpperCase()+`\r
-`,typeof this.data.trigger=="number"&&this.data.relatesTo===null?this.data.trigger>0?t+="TRIGGER;RELATED=END:"+C(this.data.trigger)+`\r
-`:t+="TRIGGER:"+C(this.data.trigger)+`\r
-`:typeof this.data.trigger=="number"?t+="TRIGGER;RELATED="+this.data.relatesTo?.toUpperCase()+":"+C(this.data.trigger)+`\r
-`:t+="TRIGGER;VALUE=DATE-TIME:"+d(this.event.timezone(),this.data.trigger)+`\r
-`,this.data.repeat){if(!this.data.repeat.times)throw new Error("No value for `repeat.times` in ICalAlarm given, but required for `interval`!");if(!this.data.repeat.interval)throw new Error("No value for `repeat.interval` in ICalAlarm given, but required for `repeat`!");t+="REPEAT:"+this.data.repeat.times+`\r
-`,t+="DURATION:"+C(this.data.repeat.interval)+`\r
-`;}return this.data.type==="audio"&&this.data.attach&&this.data.attach.mime?t+="ATTACH;FMTTYPE="+r(this.data.attach.mime,false)+":"+r(this.data.attach.uri,false)+`\r
-`:this.data.type==="audio"&&this.data.attach?t+="ATTACH;VALUE=URI:"+r(this.data.attach.uri,false)+`\r
-`:this.data.type==="audio"&&(t+=`ATTACH;VALUE=URI:Basso\r
-`),this.data.type!=="audio"&&this.data.description?t+="DESCRIPTION:"+r(this.data.description,false)+`\r
-`:this.data.type!=="audio"&&(t+="DESCRIPTION:"+r(this.event.summary(),false)+`\r
-`),this.data.type==="email"&&this.data.summary?t+="SUMMARY:"+r(this.data.summary,false)+`\r
-`:this.data.type==="email"&&(t+="SUMMARY:"+r(this.event.summary(),false)+`\r
-`),this.data.type==="email"&&this.data.attendees.forEach(e=>{t+=e.toString();}),t+=D(this.data),t+=`END:VALARM\r
-`,t}trigger(t){if(t===void 0&&typeof this.data.trigger=="number")return  -1*this.data.trigger;if(t===void 0)return this.data.trigger;if(typeof t=="number"&&isFinite(t))this.data.trigger=-1*t;else {if(!t||typeof t=="number")throw new Error("`trigger` is not correct, must be a finite number or a supported date!");this.data.trigger=h(t,"trigger");}return this}triggerAfter(t){return t===void 0?this.data.trigger:this.trigger(typeof t=="number"?-1*t:t)}triggerBefore(t){return t===void 0?this.trigger():this.trigger(t)}type(t){if(t===void 0)return this.data.type;if(!t||!Object.keys(V).includes(t))throw new Error("`type` is not correct, must be either `display` or `audio`!");return this.data.type=t,this}x(t,e){if(t===void 0)return l(this.data);if(typeof t=="string"&&typeof e=="string")l(this.data,t,e);else if(typeof t=="object")l(this.data,t);else throw new Error("Either key or value is not a string!");return this}};var c=class{data;constructor(t){if(this.data={name:""},!t.name)throw new Error("No value for `name` in ICalCategory given!");this.name(t.name);}name(t){return t===void 0?this.data.name:(this.data.name=t,this)}toJSON(){return Object.assign({},this.data)}toString(){return r(this.data.name,false)}};var L=(i=>(i.BUSY="BUSY",i.FREE="FREE",i.OOF="OOF",i.TENTATIVE="TENTATIVE",i))(L||{}),z=(n=>(n.CONFIDENTIAL="CONFIDENTIAL",n.PRIVATE="PRIVATE",n.PUBLIC="PUBLIC",n))(z||{}),U=(n=>(n.CANCELLED="CANCELLED",n.CONFIRMED="CONFIRMED",n.TENTATIVE="TENTATIVE",n))(U||{}),B=(e=>(e.OPAQUE="OPAQUE",e.TRANSPARENT="TRANSPARENT",e))(B||{}),y=class{calendar;data;constructor(t,e){if(this.data={alarms:[],allDay:false,attachments:[],attendees:[],busystatus:null,categories:[],class:null,created:null,description:null,end:null,floating:false,id:crypto.randomUUID(),lastModified:null,location:null,organizer:null,priority:null,recurrenceId:null,repeating:null,sequence:0,stamp:new Date,start:new Date,status:null,summary:"",timezone:null,transparency:null,url:null,x:[]},this.calendar=e,!e)throw new Error("`calendar` option required!");t.id&&this.id(t.id),t.sequence!==void 0&&this.sequence(t.sequence),t.start&&this.start(t.start),t.end!==void 0&&this.end(t.end),t.recurrenceId!==void 0&&this.recurrenceId(t.recurrenceId),t.timezone!==void 0&&this.timezone(t.timezone),t.stamp!==void 0&&this.stamp(t.stamp),t.allDay!==void 0&&this.allDay(t.allDay),t.floating!==void 0&&this.floating(t.floating),t.repeating!==void 0&&this.repeating(t.repeating),t.summary!==void 0&&this.summary(t.summary),t.location!==void 0&&this.location(t.location),t.description!==void 0&&this.description(t.description),t.organizer!==void 0&&this.organizer(t.organizer),t.attendees!==void 0&&this.attendees(t.attendees),t.alarms!==void 0&&this.alarms(t.alarms),t.categories!==void 0&&this.categories(t.categories),t.status!==void 0&&this.status(t.status),t.busystatus!==void 0&&this.busystatus(t.busystatus),t.priority!==void 0&&this.priority(t.priority),t.url!==void 0&&this.url(t.url),t.attachments!==void 0&&this.attachments(t.attachments),t.transparency!==void 0&&this.transparency(t.transparency),t.created!==void 0&&this.created(t.created),t.lastModified!==void 0&&this.lastModified(t.lastModified),t.class!==void 0&&this.class(t.class),t.x!==void 0&&this.x(t.x);}alarms(t){return t?(t.forEach(e=>this.createAlarm(e)),this):this.data.alarms}allDay(t){return t===void 0?this.data.allDay:(this.data.allDay=!!t,this)}attachments(t){return t?(t.forEach(e=>this.createAttachment(e)),this):this.data.attachments}attendees(t){return t?(t.forEach(e=>this.createAttendee(e)),this):this.data.attendees}busystatus(t){return t===void 0?this.data.busystatus:t===null?(this.data.busystatus=null,this):(this.data.busystatus=o(L,t),this)}categories(t){return t?(t.forEach(e=>this.createCategory(e)),this):this.data.categories}class(t){return t===void 0?this.data.class:t===null?(this.data.class=null,this):(this.data.class=o(z,t),this)}createAlarm(t){let e=t instanceof I?t:new I(t,this);return this.data.alarms.push(e),e}createAttachment(t){return this.data.attachments.push(t),this}createAttendee(t){if(t instanceof f)return this.data.attendees.push(t),t;typeof t=="string"&&(t=p("data",t));let e=new f(t,this);return this.data.attendees.push(e),e}createCategory(t){let e=t instanceof c?t:new c(t);return this.data.categories.push(e),e}created(t){return t===void 0?this.data.created:t===null?(this.data.created=null,this):(this.data.created=h(t,"created"),this)}description(t){return t===void 0?this.data.description:t===null?(this.data.description=null,this):(typeof t=="string"?this.data.description={plain:t}:this.data.description=t,this)}end(t){return t===void 0?(this.swapStartAndEndIfRequired(),this.data.end):t===null?(this.data.end=null,this):(this.data.end=h(t,"end"),this)}floating(t){return t===void 0?this.data.floating:(this.data.floating=!!t,this.data.floating&&(this.data.timezone=null),this)}id(t){return t===void 0?this.data.id:(this.data.id=String(t),this)}lastModified(t){return t===void 0?this.data.lastModified:t===null?(this.data.lastModified=null,this):(this.data.lastModified=h(t,"lastModified"),this)}location(t){if(t===void 0)return this.data.location;if(typeof t=="string")return this.data.location={title:t},this;if(t&&("title"in t&&!t.title||t?.geo&&(typeof t.geo.lat!="number"||!isFinite(t.geo.lat)||typeof t.geo.lon!="number"||!isFinite(t.geo.lon))||!("title"in t)&&!t?.geo))throw new Error("`location` isn't formatted correctly. See https://sebbo2002.github.io/ical-generator/develop/reference/classes/ICalEvent.html#location");return this.data.location=t||null,this}organizer(t){return t===void 0?this.data.organizer:t===null?(this.data.organizer=null,this):(this.data.organizer=p("organizer",t),this)}priority(t){if(t===void 0)return this.data.priority;if(t===null)return this.data.priority=null,this;if(t<0||t>9)throw new Error("`priority` is invalid, musst be 0 \u2264 priority \u2264 9.");return this.data.priority=Math.round(t),this}recurrenceId(t){return t===void 0?this.data.recurrenceId:t===null?(this.data.recurrenceId=null,this):(this.data.recurrenceId=h(t,"recurrenceId"),this)}repeating(t){if(t===void 0)return this.data.repeating;if(!t)return this.data.repeating=null,this;if(x(t)||typeof t=="string")return this.data.repeating=t,this;if(this.data.repeating={freq:o(b,t.freq)},t.count){if(!isFinite(t.count))throw new Error("`repeating.count` must be a finite number!");this.data.repeating.count=t.count;}if(t.interval){if(!isFinite(t.interval))throw new Error("`repeating.interval` must be a finite number!");this.data.repeating.interval=t.interval;}if(t.until!==void 0&&(this.data.repeating.until=h(t.until,"repeating.until")),t.byDay){let e=Array.isArray(t.byDay)?t.byDay:[t.byDay];this.data.repeating.byDay=e.map(n=>o(A,n));}if(t.byMonth){let e=Array.isArray(t.byMonth)?t.byMonth:[t.byMonth];this.data.repeating.byMonth=e.map(n=>{if(typeof n!="number"||n<1||n>12)throw new Error("`repeating.byMonth` contains invalid value `"+n+"`!");return n});}if(t.byMonthDay){let e=Array.isArray(t.byMonthDay)?t.byMonthDay:[t.byMonthDay];this.data.repeating.byMonthDay=e.map(n=>{if(typeof n!="number"||n<-31||n>31||n===0)throw new Error("`repeating.byMonthDay` contains invalid value `"+n+"`!");return n});}if(t.bySetPos){if(!this.data.repeating.byDay)throw "`repeating.bySetPos` must be used along with `repeating.byDay`!";let e=Array.isArray(t.bySetPos)?t.bySetPos:[t.bySetPos];this.data.repeating.bySetPos=e.map(n=>{if(typeof n!="number"||n<-366||n>366||n===0)throw "`repeating.bySetPos` contains invalid value `"+n+"`!";return n});}if(t.exclude){let e=Array.isArray(t.exclude)?t.exclude:[t.exclude];this.data.repeating.exclude=e.map((n,i)=>h(n,`repeating.exclude[${i}]`));}return t.startOfWeek&&(this.data.repeating.startOfWeek=o(A,t.startOfWeek)),this}sequence(t){if(t===void 0)return this.data.sequence;let e=parseInt(String(t),10);if(isNaN(e))throw new Error("`sequence` must be a number!");return this.data.sequence=t,this}stamp(t){return t===void 0?this.data.stamp:(this.data.stamp=h(t,"stamp"),this)}start(t){return t===void 0?(this.swapStartAndEndIfRequired(),this.data.start):(this.data.start=h(t,"start"),this)}status(t){return t===void 0?this.data.status:t===null?(this.data.status=null,this):(this.data.status=o(U,t),this)}summary(t){return t===void 0?this.data.summary:(this.data.summary=t?String(t):"",this)}timestamp(t){return t===void 0?this.stamp():this.stamp(t)}timezone(t){return t===void 0&&this.data.timezone!==null?this.data.timezone:t===void 0?this.calendar.timezone():(this.data.timezone=t&&t!=="UTC"?t.toString():null,this.data.timezone&&(this.data.floating=false),this)}toJSON(){let t=null;return x(this.data.repeating)||typeof this.data.repeating=="string"?t=this.data.repeating.toString():this.data.repeating&&(t=Object.assign({},this.data.repeating,{exclude:this.data.repeating.exclude?.map(e=>g(e)),until:g(this.data.repeating.until)||void 0})),this.swapStartAndEndIfRequired(),Object.assign({},this.data,{created:g(this.data.created)||null,end:g(this.data.end)||null,lastModified:g(this.data.lastModified)||null,recurrenceId:g(this.data.recurrenceId)||null,repeating:t,stamp:g(this.data.stamp)||null,start:g(this.data.start)||null,x:this.x()})}toString(){let t="";if(t+=`BEGIN:VEVENT\r
-`,t+="UID:"+this.data.id+`\r
-`,t+="SEQUENCE:"+this.data.sequence+`\r
-`,this.swapStartAndEndIfRequired(),t+="DTSTAMP:"+d(this.calendar.timezone(),this.data.stamp)+`\r
-`,this.data.allDay?(t+="DTSTART;VALUE=DATE:"+d(this.timezone(),this.data.start,true)+`\r
-`,this.data.end&&(t+="DTEND;VALUE=DATE:"+d(this.timezone(),this.data.end,true)+`\r
-`),t+=`X-MICROSOFT-CDO-ALLDAYEVENT:TRUE\r
-`,t+=`X-MICROSOFT-MSNCALENDAR-ALLDAYEVENT:TRUE\r
-`):(t+=E(this.timezone(),"DTSTART",this.data.start,this.data)+`\r
-`,this.data.end&&(t+=E(this.timezone(),"DTEND",this.data.end,this.data)+`\r
-`)),x(this.data.repeating)||typeof this.data.repeating=="string"){let e=this.data.repeating.toString().replace(/\r\n/g,`
+`:``}function p(e){return typeof e==`object`&&!!e&&!(e instanceof Date)&&!h(e)&&!m(e)&&!y(e)}function m(e){return typeof e==`object`&&!!e&&`toJSDate`in e&&typeof e.toJSDate==`function`&&!y(e)}function h(e){return e!=null&&e._isAMomentObject!=null&&!y(e)}function g(e){return typeof e==`object`&&!!e&&`asSeconds`in e&&typeof e.asSeconds==`function`}function _(e){return h(e)&&`tz`in e&&typeof e.tz==`function`}function v(e){return typeof e==`object`&&!!e&&`between`in e&&typeof e.between==`function`&&typeof e.toString==`function`}function y(e){return C(e)||S(e)||x(e)||b(e)}function b(e){return typeof e==`object`&&!!e&&!C(e)&&!S(e)&&!x(e)&&`toZonedDateTimeISO`in e&&typeof e.toZonedDateTimeISO==`function`&&!(`year`in e)&&!(`timeZoneId`in e)}function x(e){return typeof e==`object`&&!!e&&!C(e)&&!S(e)&&`toPlainDateTime`in e&&typeof e.toPlainDateTime==`function`&&`year`in e&&typeof e.year==`number`&&`month`in e&&typeof e.month==`number`&&`day`in e&&typeof e.day==`number`&&!(`hour`in e)&&!(`timeZoneId`in e)&&!(`epochSeconds`in e)}function S(e){return typeof e==`object`&&!!e&&!C(e)&&`toZonedDateTime`in e&&typeof e.toZonedDateTime==`function`&&`toPlainDate`in e&&typeof e.toPlainDate==`function`&&`year`in e&&typeof e.year==`number`&&`month`in e&&typeof e.month==`number`&&`day`in e&&typeof e.day==`number`&&`hour`in e&&typeof e.hour==`number`&&`minute`in e&&typeof e.minute==`number`&&`second`in e&&typeof e.second==`number`&&!(`timeZone`in e)}function C(e){return typeof e==`object`&&!!e&&`timeZoneId`in e&&typeof e.timeZoneId==`string`&&`toPlainDateTime`in e&&typeof e.toPlainDateTime==`function`&&`year`in e&&typeof e.year==`number`&&`month`in e&&typeof e.month==`number`&&`day`in e&&typeof e.day==`number`&&`hour`in e&&typeof e.hour==`number`&&`minute`in e&&typeof e.minute==`number`&&`second`in e&&typeof e.second==`number`}function w(e){return e instanceof Date&&`internal`in e&&e.internal instanceof Date&&`withTimeZone`in e&&typeof e.withTimeZone==`function`&&`tzComponents`in e&&typeof e.tzComponents==`function`}function T(e){if(typeof e==`string`||e instanceof Date)return new Date(e);if(C(e)){let t=e.toInstant();return new Date(t.epochMilliseconds)}return S(e)?new Date(Date.UTC(e.year,e.month-1,e.day,e.hour,e.minute,e.second)):x(e)?new Date(Date.UTC(e.year,e.month-1,e.day)):b(e)?new Date(e.epochMilliseconds):m(e)?e.toJSDate():e.toDate()}function E(e){let t=``;return e<0&&(t=`-`,e*=-1),t+=`P`,e>=86400&&(t+=Math.floor(e/86400)+`D`,e%=86400),!e&&t.length>1?t:(t+=`T`,e>=3600&&(t+=Math.floor(e/3600)+`H`,e%=3600),e>=60&&(t+=Math.floor(e/60)+`M`,e%=60),e>0?t+=e+`S`:t.length<=2&&(t+=`0S`),t)}function D(e){return e?typeof e==`string`?e:C(e)?D(e.withTimeZone(`UTC`).toPlainDateTime()):(y(e),e.toJSON()):null}let O=function(e){return e.CHAIR=`CHAIR`,e.NON=`NON-PARTICIPANT`,e.OPT=`OPT-PARTICIPANT`,e.REQ=`REQ-PARTICIPANT`,e}({}),k=function(e){return e.CLIENT=`CLIENT`,e.NONE=`NONE`,e.SERVER=`SERVER`,e}({}),A=function(e){return e.ACCEPTED=`ACCEPTED`,e.DECLINED=`DECLINED`,e.DELEGATED=`DELEGATED`,e.NEEDSACTION=`NEEDS-ACTION`,e.TENTATIVE=`TENTATIVE`,e}({}),j=function(e){return e.GROUP=`GROUP`,e.INDIVIDUAL=`INDIVIDUAL`,e.RESOURCE=`RESOURCE`,e.ROOM=`ROOM`,e.UNKNOWN=`UNKNOWN`,e}({});var M=class e{data;parent;constructor(e,t){if(this.data={delegatedFrom:null,delegatedTo:null,email:``,mailto:null,name:null,role:`REQ-PARTICIPANT`,rsvp:null,scheduleAgent:null,sentBy:null,status:null,type:null,x:[]},this.parent=t,!this.parent)throw Error("`event` option required!");if(!e.email)throw Error("No value for `email` in ICalAttendee given!");e.name!==void 0&&this.name(e.name),e.email!==void 0&&this.email(e.email),e.mailto!==void 0&&this.mailto(e.mailto),e.sentBy!==void 0&&this.sentBy(e.sentBy),e.status!==void 0&&this.status(e.status),e.role!==void 0&&this.role(e.role),e.rsvp!==void 0&&this.rsvp(e.rsvp),e.type!==void 0&&this.type(e.type),e.delegatedTo!==void 0&&this.delegatedTo(e.delegatedTo),e.delegatedFrom!==void 0&&this.delegatedFrom(e.delegatedFrom),e.delegatesTo&&this.delegatesTo(e.delegatesTo),e.delegatesFrom&&this.delegatesFrom(e.delegatesFrom),e.scheduleAgent!==void 0&&this.scheduleAgent(e.scheduleAgent),e.x!==void 0&&this.x(e.x);}delegatedFrom(t){return t===void 0?this.data.delegatedFrom:(t?typeof t==`string`?this.data.delegatedFrom=new e(s(`delegatedFrom`,t),this.parent):t instanceof e?this.data.delegatedFrom=t:this.data.delegatedFrom=new e(t,this.parent):this.data.delegatedFrom=null,this)}delegatedTo(t){return t===void 0?this.data.delegatedTo:t?(typeof t==`string`?this.data.delegatedTo=new e(s(`delegatedTo`,t),this.parent):t instanceof e?this.data.delegatedTo=t:this.data.delegatedTo=new e(t,this.parent),this.data.status=`DELEGATED`,this):(this.data.delegatedTo=null,this.data.status===`DELEGATED`&&(this.data.status=null),this)}delegatesFrom(t){let n=t instanceof e?t:this.parent.createAttendee(t);return this.delegatedFrom(n),n.delegatedTo(this),n}delegatesTo(t){let n=t instanceof e?t:this.parent.createAttendee(t);return this.delegatedTo(n),n.delegatedFrom(this),n}email(e){return e?(this.data.email=e,this):this.data.email}mailto(e){return e===void 0?this.data.mailto:(this.data.mailto=e||null,this)}name(e){return e===void 0?this.data.name:(this.data.name=e||null,this)}role(e){return e===void 0?this.data.role:(this.data.role=o(O,e),this)}rsvp(e){return e===void 0?this.data.rsvp:e===null?(this.data.rsvp=null,this):(this.data.rsvp=!!e,this)}scheduleAgent(e){return e===void 0?this.data.scheduleAgent:e?typeof e==`string`&&e.toUpperCase().startsWith(`X-`)?(this.data.scheduleAgent=e,this):(this.data.scheduleAgent=o(k,e),this):(this.data.scheduleAgent=null,this)}sentBy(e){return e?(this.data.sentBy=e,this):this.data.sentBy}status(e){return e===void 0?this.data.status:e?(this.data.status=o(A,e),this):(this.data.status=null,this)}toJSON(){return Object.assign({},this.data,{delegatedFrom:this.data.delegatedFrom?.email()||null,delegatedTo:this.data.delegatedTo?.email()||null,x:this.x()})}toString(){let e=`ATTENDEE`;if(!this.data.email)throw Error("No value for `email` in ICalAttendee given!");return e+=`;ROLE=`+this.data.role,this.data.type&&(e+=`;CUTYPE=`+this.data.type),this.data.status&&(e+=`;PARTSTAT=`+this.data.status),this.data.rsvp!==null&&(e+=`;RSVP=`+this.data.rsvp.toString().toUpperCase()),this.data.sentBy!==null&&(e+=`;SENT-BY="mailto:`+this.data.sentBy+`"`),this.data.delegatedTo&&(e+=`;DELEGATED-TO="`+this.data.delegatedTo.email()+`"`),this.data.delegatedFrom&&(e+=`;DELEGATED-FROM="`+this.data.delegatedFrom.email()+`"`),this.data.name&&(e+=`;CN="`+c(this.data.name,true)+`"`),this.data.email&&this.data.mailto&&(e+=`;EMAIL=`+c(this.data.email,false)),this.data.scheduleAgent&&(e+=`;SCHEDULE-AGENT=`+this.data.scheduleAgent),this.data.x.length&&(e+=`;`+this.data.x.map(([e,t])=>e.toUpperCase()+`=`+c(t,false)).join(`;`)),e+=`:MAILTO:`+c(this.data.mailto||this.data.email,false)+`\r
+`,e}type(e){return e===void 0?this.data.type:e?(this.data.type=o(j,e),this):(this.data.type=null,this)}x(e,t){if(e===void 0)return i(this.data);if(typeof e==`string`&&typeof t==`string`)i(this.data,e,t);else if(typeof e==`object`)i(this.data,e);else throw Error(`Either key or value is not a string!`);return this}};let N=function(e){return e.audio=`audio`,e.display=`display`,e.email=`email`,e}({});const P={end:`END`,start:`START`};var F=class{data;event;constructor(e,t){if(this.data={attach:null,attendees:[],description:null,interval:null,relatesTo:null,repeat:null,summary:null,trigger:-600,type:`display`,x:[]},this.event=t,!t)throw Error("`event` option required!");e.type!==void 0&&this.type(e.type),`trigger`in e&&e.trigger!==void 0&&this.trigger(e.trigger),`triggerBefore`in e&&e.triggerBefore!==void 0&&this.triggerBefore(e.triggerBefore),`triggerAfter`in e&&e.triggerAfter!==void 0&&this.triggerAfter(e.triggerAfter),e.repeat&&this.repeat(e.repeat),e.attach!==void 0&&this.attach(e.attach),e.description!==void 0&&this.description(e.description),e.summary!==void 0&&this.summary(e.summary),e.attendees!==void 0&&this.attendees(e.attendees),e.x!==void 0&&this.x(e.x);}attach(e){if(e===void 0)return this.data.attach;if(!e)return this.data.attach=null,this;let t;if(typeof e==`string`)t={mime:null,uri:e};else if(typeof e==`object`)t={mime:e.mime||null,uri:e.uri};else throw Error("`attachment` needs to be a valid formed string or an object. See https://sebbo2002.github.io/ical-generator/develop/reference/classes/ICalAlarm.html#attach");if(!t.uri)throw Error("`attach.uri` is empty!");return this.data.attach={mime:t.mime,uri:t.uri},this}attendees(e){return e?(e.forEach(e=>this.createAttendee(e)),this):this.data.attendees}createAttendee(e){if(e instanceof M)return this.data.attendees.push(e),e;typeof e==`string`&&(e=s(`data`,e));let t=new M(e,this);return this.data.attendees.push(t),t}description(e){return e===void 0?this.data.description:e?(this.data.description=e,this):(this.data.description=null,this)}relatesTo(e){if(e===void 0)return this.data.relatesTo;if(!e)return this.data.relatesTo=null,this;if(!Object.values(P).includes(e))throw Error("`relatesTo` is not correct, must be either `START` or `END`!");return this.data.relatesTo=e,this}repeat(e){if(e===void 0)return this.data.repeat;if(!e)return this.data.repeat=null,this;if(typeof e!=`object`)throw Error("`repeat` is not correct, must be an object!");if(typeof e.times!=`number`||!isFinite(e.times))throw Error("`repeat.times` is not correct, must be numeric!");if(typeof e.interval!=`number`||!isFinite(e.interval))throw Error("`repeat.interval` is not correct, must be numeric!");return this.data.repeat=e,this}summary(e){return e===void 0?this.data.summary:e?(this.data.summary=e,this):(this.data.summary=null,this)}toJSON(){let e=this.trigger();return Object.assign({},this.data,{trigger:typeof e==`number`?e:D(e),x:this.x()})}toString(){let e=`BEGIN:VALARM\r
+`;if(e+=`ACTION:`+this.data.type.toUpperCase()+`\r
+`,typeof this.data.trigger==`number`&&this.data.relatesTo===null?this.data.trigger>0?e+=`TRIGGER;RELATED=END:`+E(this.data.trigger)+`\r
+`:e+=`TRIGGER:`+E(this.data.trigger)+`\r
+`:typeof this.data.trigger==`number`?e+=`TRIGGER;RELATED=`+this.data.relatesTo?.toUpperCase()+`:`+E(this.data.trigger)+`\r
+`:e+=`TRIGGER;VALUE=DATE-TIME:`+u(this.event.timezone(),this.data.trigger)+`\r
+`,this.data.repeat){if(!this.data.repeat.times)throw Error("No value for `repeat.times` in ICalAlarm given, but required for `interval`!");if(!this.data.repeat.interval)throw Error("No value for `repeat.interval` in ICalAlarm given, but required for `repeat`!");e+=`REPEAT:`+this.data.repeat.times+`\r
+`,e+=`DURATION:`+E(this.data.repeat.interval)+`\r
+`;}return this.data.type===`audio`&&this.data.attach&&this.data.attach.mime?e+=`ATTACH;FMTTYPE=`+c(this.data.attach.mime,false)+`:`+c(this.data.attach.uri,false)+`\r
+`:this.data.type===`audio`&&this.data.attach?e+=`ATTACH;VALUE=URI:`+c(this.data.attach.uri,false)+`\r
+`:this.data.type===`audio`&&(e+=`ATTACH;VALUE=URI:Basso\r
+`),this.data.type!==`audio`&&this.data.description?e+=`DESCRIPTION:`+c(this.data.description,false)+`\r
+`:this.data.type!==`audio`&&(e+=`DESCRIPTION:`+c(this.event.summary(),false)+`\r
+`),this.data.type===`email`&&this.data.summary?e+=`SUMMARY:`+c(this.data.summary,false)+`\r
+`:this.data.type===`email`&&(e+=`SUMMARY:`+c(this.event.summary(),false)+`\r
+`),this.data.type===`email`&&this.data.attendees.forEach(t=>{e+=t.toString();}),e+=f(this.data),e+=`END:VALARM\r
+`,e}trigger(e){if(e===void 0&&typeof this.data.trigger==`number`)return  -1*this.data.trigger;if(e===void 0)return this.data.trigger;if(typeof e==`number`&&isFinite(e))this.data.trigger=-1*e;else if(!e||typeof e==`number`)throw Error("`trigger` is not correct, must be a finite number or a supported date!");else this.data.trigger=a(e,`trigger`);return this}triggerAfter(e){return e===void 0?this.data.trigger:this.trigger(typeof e==`number`?-1*e:e)}triggerBefore(e){return e===void 0?this.trigger():this.trigger(e)}type(e){if(e===void 0)return this.data.type;if(!e||!Object.keys(N).includes(e))throw Error("`type` is not correct, must be either `display` or `audio`!");return this.data.type=e,this}x(e,t){if(e===void 0)return i(this.data);if(typeof e==`string`&&typeof t==`string`)i(this.data,e,t);else if(typeof e==`object`)i(this.data,e);else throw Error(`Either key or value is not a string!`);return this}},I=class{data;constructor(e){if(this.data={name:``},!e.name)throw Error("No value for `name` in ICalCategory given!");this.name(e.name);}name(e){return e===void 0?this.data.name:(this.data.name=e,this)}toJSON(){return Object.assign({},this.data)}toString(){return c(this.data.name,false)}};let L=function(e){return e.BUSY=`BUSY`,e.FREE=`FREE`,e.OOF=`OOF`,e.TENTATIVE=`TENTATIVE`,e}({}),R=function(e){return e.CONFIDENTIAL=`CONFIDENTIAL`,e.PRIVATE=`PRIVATE`,e.PUBLIC=`PUBLIC`,e}({}),z=function(e){return e.CANCELLED=`CANCELLED`,e.CONFIRMED=`CONFIRMED`,e.TENTATIVE=`TENTATIVE`,e}({}),B=function(e){return e.OPAQUE=`OPAQUE`,e.TRANSPARENT=`TRANSPARENT`,e}({});var V=class{calendar;data;constructor(e,t){if(this.data={alarms:[],allDay:false,attachments:[],attendees:[],busystatus:null,categories:[],class:null,created:null,description:null,end:null,floating:false,id:crypto.randomUUID(),lastModified:null,location:null,organizer:null,priority:null,recurrenceId:null,repeating:null,sequence:0,stamp:new Date,start:new Date,status:null,summary:``,timezone:null,transparency:null,travelTime:null,url:null,x:[]},this.calendar=t,!t)throw Error("`calendar` option required!");e.id&&this.id(e.id),e.sequence!==void 0&&this.sequence(e.sequence),e.start&&this.start(e.start),e.end!==void 0&&this.end(e.end),e.recurrenceId!==void 0&&this.recurrenceId(e.recurrenceId),e.timezone!==void 0&&this.timezone(e.timezone),e.stamp!==void 0&&this.stamp(e.stamp),e.allDay!==void 0&&this.allDay(e.allDay),e.floating!==void 0&&this.floating(e.floating),e.repeating!==void 0&&this.repeating(e.repeating),e.summary!==void 0&&this.summary(e.summary),e.location!==void 0&&this.location(e.location),e.description!==void 0&&this.description(e.description),e.organizer!==void 0&&this.organizer(e.organizer),e.attendees!==void 0&&this.attendees(e.attendees),e.alarms!==void 0&&this.alarms(e.alarms),e.categories!==void 0&&this.categories(e.categories),e.status!==void 0&&this.status(e.status),e.busystatus!==void 0&&this.busystatus(e.busystatus),e.priority!==void 0&&this.priority(e.priority),e.url!==void 0&&this.url(e.url),e.attachments!==void 0&&this.attachments(e.attachments),e.transparency!==void 0&&this.transparency(e.transparency),e.travelTime!==void 0&&this.travelTime(e.travelTime),e.created!==void 0&&this.created(e.created),e.lastModified!==void 0&&this.lastModified(e.lastModified),e.class!==void 0&&this.class(e.class),e.x!==void 0&&this.x(e.x);}alarms(e){return e?(e.forEach(e=>this.createAlarm(e)),this):this.data.alarms}allDay(e){return e===void 0?this.data.allDay:(this.data.allDay=!!e,this)}attachments(e){return e?(e.forEach(e=>this.createAttachment(e)),this):this.data.attachments}attendees(e){return e?(e.forEach(e=>this.createAttendee(e)),this):this.data.attendees}busystatus(e){return e===void 0?this.data.busystatus:e===null?(this.data.busystatus=null,this):(this.data.busystatus=o(L,e),this)}categories(e){return e?(e.forEach(e=>this.createCategory(e)),this):this.data.categories}class(e){return e===void 0?this.data.class:e===null?(this.data.class=null,this):(this.data.class=o(R,e),this)}createAlarm(e){let t=e instanceof F?e:new F(e,this);return this.data.alarms.push(t),t}createAttachment(e){return this.data.attachments.push(e),this}createAttendee(e){if(e instanceof M)return this.data.attendees.push(e),e;typeof e==`string`&&(e=s(`data`,e));let t=new M(e,this);return this.data.attendees.push(t),t}createCategory(e){let t=e instanceof I?e:new I(e);return this.data.categories.push(t),t}created(e){return e===void 0?this.data.created:e===null?(this.data.created=null,this):(this.data.created=a(e,`created`),this)}description(e){return e===void 0?this.data.description:e===null?(this.data.description=null,this):(typeof e==`string`?this.data.description={plain:e}:this.data.description=e,this)}end(e){return e===void 0?(this.swapStartAndEndIfRequired(),this.data.end):e===null?(this.data.end=null,this):(this.data.end=a(e,`end`),this)}floating(e){return e===void 0?this.data.floating:(this.data.floating=!!e,this.data.floating&&(this.data.timezone=null),this)}id(e){return e===void 0?this.data.id:(this.data.id=String(e),this)}lastModified(e){return e===void 0?this.data.lastModified:e===null?(this.data.lastModified=null,this):(this.data.lastModified=a(e,`lastModified`),this)}location(e){if(e===void 0)return this.data.location;if(typeof e==`string`)return this.data.location={title:e},this;if(e&&(`title`in e&&!e.title||e?.geo&&(typeof e.geo.lat!=`number`||!isFinite(e.geo.lat)||typeof e.geo.lon!=`number`||!isFinite(e.geo.lon))||!(`title`in e)&&!e?.geo))throw Error("`location` isn't formatted correctly. See https://sebbo2002.github.io/ical-generator/develop/reference/classes/ICalEvent.html#location");return this.data.location=e||null,this}organizer(e){return e===void 0?this.data.organizer:e===null?(this.data.organizer=null,this):(this.data.organizer=s(`organizer`,e),this)}priority(e){if(e===void 0)return this.data.priority;if(e===null)return this.data.priority=null,this;if(e<0||e>9)throw Error("`priority` is invalid, musst be 0 ≤ priority ≤ 9.");return this.data.priority=Math.round(e),this}recurrenceId(e){return e===void 0?this.data.recurrenceId:e===null?(this.data.recurrenceId=null,this):(this.data.recurrenceId=a(e,`recurrenceId`),this)}repeating(t){if(t===void 0)return this.data.repeating;if(!t)return this.data.repeating=null,this;if(v(t)||typeof t==`string`)return this.data.repeating=t,this;if(this.data.repeating={freq:o(e,t.freq)},t.count){if(!isFinite(t.count))throw Error("`repeating.count` must be a finite number!");this.data.repeating.count=t.count;}if(t.interval){if(!isFinite(t.interval))throw Error("`repeating.interval` must be a finite number!");this.data.repeating.interval=t.interval;}if(t.until!==void 0&&(this.data.repeating.until=a(t.until,`repeating.until`)),t.byDay){let e=Array.isArray(t.byDay)?t.byDay:[t.byDay];this.data.repeating.byDay=e.map(e=>o(r,e));}if(t.byMonth){let e=Array.isArray(t.byMonth)?t.byMonth:[t.byMonth];this.data.repeating.byMonth=e.map(e=>{if(typeof e!=`number`||e<1||e>12)throw Error("`repeating.byMonth` contains invalid value `"+e+"`!");return e});}if(t.byMonthDay){let e=Array.isArray(t.byMonthDay)?t.byMonthDay:[t.byMonthDay];this.data.repeating.byMonthDay=e.map(e=>{if(typeof e!=`number`||e<-31||e>31||e===0)throw Error("`repeating.byMonthDay` contains invalid value `"+e+"`!");return e});}if(t.bySetPos){if(!this.data.repeating.byDay)throw "`repeating.bySetPos` must be used along with `repeating.byDay`!";let e=Array.isArray(t.bySetPos)?t.bySetPos:[t.bySetPos];this.data.repeating.bySetPos=e.map(e=>{if(typeof e!=`number`||e<-366||e>366||e===0)throw "`repeating.bySetPos` contains invalid value `"+e+"`!";return e});}if(t.exclude){let e=Array.isArray(t.exclude)?t.exclude:[t.exclude];this.data.repeating.exclude=e.map((e,t)=>a(e,`repeating.exclude[${t}]`));}return t.startOfWeek&&(this.data.repeating.startOfWeek=o(r,t.startOfWeek)),this}sequence(e){if(e===void 0)return this.data.sequence;if(isNaN(parseInt(String(e),10)))throw Error("`sequence` must be a number!");return this.data.sequence=e,this}stamp(e){return e===void 0?this.data.stamp:(this.data.stamp=a(e,`stamp`),this)}start(e){return e===void 0?(this.swapStartAndEndIfRequired(),this.data.start):(this.data.start=a(e,`start`),this)}status(e){return e===void 0?this.data.status:e===null?(this.data.status=null,this):(this.data.status=o(z,e),this)}summary(e){return e===void 0?this.data.summary:(this.data.summary=e?String(e):``,this)}timestamp(e){return e===void 0?this.stamp():this.stamp(e)}timezone(e){return e===void 0&&this.data.timezone!==null?this.data.timezone:e===void 0?this.calendar.timezone():(this.data.timezone=e&&e!==`UTC`?e.toString():null,this.data.timezone&&(this.data.floating=false),this)}toJSON(){let e=null;return v(this.data.repeating)||typeof this.data.repeating==`string`?e=this.data.repeating.toString():this.data.repeating&&(e=Object.assign({},this.data.repeating,{exclude:this.data.repeating.exclude?.map(e=>D(e)),until:D(this.data.repeating.until)||void 0})),this.swapStartAndEndIfRequired(),Object.assign({},this.data,{created:D(this.data.created)||null,end:D(this.data.end)||null,lastModified:D(this.data.lastModified)||null,recurrenceId:D(this.data.recurrenceId)||null,repeating:e,stamp:D(this.data.stamp)||null,start:D(this.data.start)||null,x:this.x()})}toString(){let e=``;if(e+=`BEGIN:VEVENT\r
+`,e+=`UID:`+this.data.id+`\r
+`,e+=`SEQUENCE:`+this.data.sequence+`\r
+`,this.swapStartAndEndIfRequired(),e+=`DTSTAMP:`+u(this.calendar.timezone(),this.data.stamp)+`\r
+`,this.data.allDay?(e+=`DTSTART;VALUE=DATE:`+u(this.timezone(),this.data.start,true)+`\r
+`,this.data.end&&(e+=`DTEND;VALUE=DATE:`+u(this.timezone(),this.data.end,true)+`\r
+`),e+=`X-MICROSOFT-CDO-ALLDAYEVENT:TRUE\r
+`,e+=`X-MICROSOFT-MSNCALENDAR-ALLDAYEVENT:TRUE\r
+`):(e+=d(this.timezone(),`DTSTART`,this.data.start,this.data)+`\r
+`,this.data.end&&(e+=d(this.timezone(),`DTEND`,this.data.end,this.data)+`\r
+`)),v(this.data.repeating)||typeof this.data.repeating==`string`){let t=this.data.repeating.toString().replace(/\r\n/g,`
 `).split(`
-`).filter(n=>n&&!n.startsWith("DTSTART:")).join(`\r
-`);!e.includes(`\r
-`)&&!e.startsWith("RRULE:")&&(e="RRULE:"+e),t+=e.trim()+`\r
-`;}else this.data.repeating&&(t+="RRULE:FREQ="+this.data.repeating.freq,this.data.repeating.count&&(t+=";COUNT="+this.data.repeating.count),this.data.repeating.interval&&(t+=";INTERVAL="+this.data.repeating.interval),this.data.repeating.until&&(t+=";UNTIL="+d(this.calendar.timezone(),this.data.repeating.until,false,this.floating())),this.data.repeating.byDay&&(t+=";BYDAY="+this.data.repeating.byDay.join(",")),this.data.repeating.byMonth&&(t+=";BYMONTH="+this.data.repeating.byMonth.join(",")),this.data.repeating.byMonthDay&&(t+=";BYMONTHDAY="+this.data.repeating.byMonthDay.join(",")),this.data.repeating.bySetPos&&(t+=";BYSETPOS="+this.data.repeating.bySetPos.join(",")),this.data.repeating.startOfWeek&&(t+=";WKST="+this.data.repeating.startOfWeek),t+=`\r
-`,this.data.repeating.exclude&&(this.data.allDay?t+="EXDATE;VALUE=DATE:"+this.data.repeating.exclude.map(e=>d(this.calendar.timezone(),e,true)).join(",")+`\r
-`:(t+="EXDATE",this.timezone()?t+=";TZID="+this.timezone()+":"+this.data.repeating.exclude.map(e=>d(this.timezone(),e,false,true)).join(",")+`\r
-`:t+=":"+this.data.repeating.exclude.map(e=>d(this.timezone(),e,false,this.floating())).join(",")+`\r
-`)));return this.data.recurrenceId&&(t+=E(this.timezone(),"RECURRENCE-ID",this.data.recurrenceId,this.data)+`\r
-`),t+="SUMMARY:"+r(this.data.summary,false)+`\r
-`,this.data.transparency&&(t+="TRANSP:"+r(this.data.transparency,false)+`\r
-`),this.data.location&&"title"in this.data.location&&this.data.location.title&&(t+="LOCATION:"+r(this.data.location.title+(this.data.location.address?`
-`+this.data.location.address:""),false)+`\r
-`,this.data.location.radius&&this.data.location.geo&&(t+="X-APPLE-STRUCTURED-LOCATION;VALUE=URI;"+(this.data.location.address?"X-ADDRESS="+r(this.data.location.address,false)+";":"")+"X-APPLE-RADIUS="+r(this.data.location.radius,false)+";X-TITLE="+r(this.data.location.title,false)+":geo:"+r(this.data.location.geo?.lat,false)+","+r(this.data.location.geo?.lon,false)+`\r
-`)),this.data.location?.geo?.lat&&this.data.location.geo.lon&&(t+="GEO:"+r(this.data.location.geo.lat,false)+";"+r(this.data.location.geo.lon,false)+`\r
-`),this.data.description&&(t+="DESCRIPTION:"+r(this.data.description.plain,false)+`\r
-`,this.data.description.html&&(t+="X-ALT-DESC;FMTTYPE=text/html:"+r(this.data.description.html,false)+`\r
-`)),this.data.organizer&&(t+='ORGANIZER;CN="'+r(this.data.organizer.name,true)+'"',this.data.organizer.sentBy&&(t+=';SENT-BY="mailto:'+r(this.data.organizer.sentBy,true)+'"'),this.data.organizer.email&&this.data.organizer.mailto&&(t+=";EMAIL="+r(this.data.organizer.email,false)),t+=":",this.data.organizer.email&&(t+="mailto:"+r(this.data.organizer.mailto||this.data.organizer.email,false)),t+=`\r
-`),this.data.attendees.forEach(function(e){t+=e.toString();}),this.data.alarms.forEach(function(e){t+=e.toString();}),this.data.categories.length>0&&(t+="CATEGORIES:"+this.data.categories.map(e=>e.toString()).join()+`\r
-`),this.data.url&&(t+="URL;VALUE=URI:"+r(this.data.url,false)+`\r
-`),this.data.attachments.length>0&&this.data.attachments.forEach(e=>{t+="ATTACH:"+r(e,false)+`\r
-`;}),this.data.status&&(t+="STATUS:"+this.data.status.toUpperCase()+`\r
-`),this.data.busystatus&&(t+="X-MICROSOFT-CDO-BUSYSTATUS:"+this.data.busystatus.toUpperCase()+`\r
-`),this.data.priority!==null&&(t+="PRIORITY:"+this.data.priority+`\r
-`),t+=D(this.data),this.data.created&&(t+="CREATED:"+d(this.calendar.timezone(),this.data.created)+`\r
-`),this.data.lastModified&&(t+="LAST-MODIFIED:"+d(this.calendar.timezone(),this.data.lastModified)+`\r
-`),this.data.class&&(t+="CLASS:"+this.data.class.toUpperCase()+`\r
-`),t+=`END:VEVENT\r
-`,t}transparency(t){return t===void 0?this.data.transparency:t?(this.data.transparency=o(B,t),this):(this.data.transparency=null,this)}uid(t){return t===void 0?this.id():this.id(t)}url(t){return t===void 0?this.data.url:(this.data.url=t?String(t):null,this)}x(t,e){return t===void 0?l(this.data):(typeof t=="string"&&typeof e=="string"&&l(this.data,t,e),typeof t=="object"&&l(this.data,t),this)}swapStartAndEndIfRequired(){if(this.data.start&&this.data.end&&v(this.data.start).getTime()>v(this.data.end).getTime()){let t=this.data.start;this.data.start=this.data.end,this.data.end=t;}}};var P=(m=>(m.ADD="ADD",m.CANCEL="CANCEL",m.COUNTER="COUNTER",m.DECLINECOUNTER="DECLINECOUNTER",m.PUBLISH="PUBLISH",m.REFRESH="REFRESH",m.REPLY="REPLY",m.REQUEST="REQUEST",m))(P||{}),T=class{data;constructor(t={}){this.data={description:null,events:[],method:null,name:null,prodId:"//sebbo.net//ical-generator//EN",scale:null,source:null,timezone:null,ttl:null,url:null,x:[]},t.prodId!==void 0&&this.prodId(t.prodId),t.method!==void 0&&this.method(t.method),t.name!==void 0&&this.name(t.name),t.description!==void 0&&this.description(t.description),t.timezone!==void 0&&this.timezone(t.timezone),t.source!==void 0&&this.source(t.source),t.url!==void 0&&this.url(t.url),t.scale!==void 0&&this.scale(t.scale),t.ttl!==void 0&&this.ttl(t.ttl),t.events!==void 0&&this.events(t.events),t.x!==void 0&&this.x(t.x);}clear(){return this.data.events=[],this}createEvent(t){let e=t instanceof y?t:new y(t,this);return this.data.events.push(e),e}description(t){return t===void 0?this.data.description:(this.data.description=t?String(t):null,this)}events(t){return t?(t.forEach(e=>this.createEvent(e)),this):this.data.events}length(){return this.data.events.length}method(t){return t===void 0?this.data.method:t?(this.data.method=o(P,t),this):(this.data.method=null,this)}name(t){return t===void 0?this.data.name:(this.data.name=t?String(t):null,this)}prodId(t){if(!t)return this.data.prodId;if(typeof t=="string")return this.data.prodId=t,this;if(typeof t!="object")throw new Error("`prodid` needs to be a string or an object!");if(!t.company)throw new Error("`prodid.company` is a mandatory item!");if(!t.product)throw new Error("`prodid.product` is a mandatory item!");let e=(t.language||"EN").toUpperCase();return this.data.prodId="//"+t.company+"//"+t.product+"//"+e,this}scale(t){return t===void 0?this.data.scale:(t===null?this.data.scale=null:this.data.scale=t.toUpperCase(),this)}source(t){return t===void 0?this.data.source:(this.data.source=t||null,this)}timezone(t){return t===void 0?this.data.timezone?.name||null:(t==="UTC"?this.data.timezone=null:typeof t=="string"?this.data.timezone={name:t}:t===null?this.data.timezone=null:this.data.timezone=t,this)}toJSON(){return Object.assign({},this.data,{events:this.data.events.map(t=>t.toJSON()),timezone:this.timezone(),x:this.x()})}toString(){let t="";return t=`BEGIN:VCALENDAR\r
+`).filter(e=>e&&!e.startsWith(`DTSTART:`)).join(`\r
+`);!t.includes(`\r
+`)&&!t.startsWith(`RRULE:`)&&(t=`RRULE:`+t),e+=t.trim()+`\r
+`;}else this.data.repeating&&(e+=`RRULE:FREQ=`+this.data.repeating.freq,this.data.repeating.count&&(e+=`;COUNT=`+this.data.repeating.count),this.data.repeating.interval&&(e+=`;INTERVAL=`+this.data.repeating.interval),this.data.repeating.until&&(e+=`;UNTIL=`+u(this.calendar.timezone(),this.data.repeating.until,false,this.floating())),this.data.repeating.byDay&&(e+=`;BYDAY=`+this.data.repeating.byDay.join(`,`)),this.data.repeating.byMonth&&(e+=`;BYMONTH=`+this.data.repeating.byMonth.join(`,`)),this.data.repeating.byMonthDay&&(e+=`;BYMONTHDAY=`+this.data.repeating.byMonthDay.join(`,`)),this.data.repeating.bySetPos&&(e+=`;BYSETPOS=`+this.data.repeating.bySetPos.join(`,`)),this.data.repeating.startOfWeek&&(e+=`;WKST=`+this.data.repeating.startOfWeek),e+=`\r
+`,this.data.repeating.exclude&&(this.data.allDay?e+=`EXDATE;VALUE=DATE:`+this.data.repeating.exclude.map(e=>u(this.calendar.timezone(),e,true)).join(`,`)+`\r
+`:(e+=`EXDATE`,this.timezone()?e+=`;TZID=`+this.timezone()+`:`+this.data.repeating.exclude.map(e=>u(this.timezone(),e,false,true)).join(`,`)+`\r
+`:e+=`:`+this.data.repeating.exclude.map(e=>u(this.timezone(),e,false,this.floating())).join(`,`)+`\r
+`)));if(this.data.recurrenceId&&(e+=d(this.timezone(),`RECURRENCE-ID`,this.data.recurrenceId,this.data)+`\r
+`),e+=`SUMMARY:`+c(this.data.summary,false)+`\r
+`,this.data.transparency&&(e+=`TRANSP:`+c(this.data.transparency,false)+`\r
+`),this.data.location&&`title`in this.data.location&&this.data.location.title&&(e+=`LOCATION:`+c(this.data.location.title+(this.data.location.address?`
+`+this.data.location.address:``),false)+`\r
+`,this.data.location.radius&&this.data.location.geo&&(e+=`X-APPLE-STRUCTURED-LOCATION;VALUE=URI;`+(this.data.location.address?`X-ADDRESS=`+c(this.data.location.address,false)+`;`:``)+`X-APPLE-RADIUS=`+c(this.data.location.radius,false)+`;X-TITLE=`+c(this.data.location.title,false)+`:geo:`+c(this.data.location.geo?.lat,false)+`,`+c(this.data.location.geo?.lon,false)+`\r
+`)),this.data.location?.geo?.lat&&this.data.location.geo.lon&&(e+=`GEO:`+c(this.data.location.geo.lat,false)+`;`+c(this.data.location.geo.lon,false)+`\r
+`),this.data.travelTime&&(e+=`X-APPLE-TRAVEL-DURATION;VALUE=DURATION:`+E(this.data.travelTime.seconds)+`\r
+`,this.data.location&&(this.data.travelTime.suggestionBehavior&&(e+=`X-APPLE-TRAVEL-ADVISORY-BEHAVIOR:`+this.data.travelTime.suggestionBehavior+`\r
+`),this.data.travelTime.startFrom))){e+=`X-APPLE-TRAVEL-START;`;let t=[];t.push(`ROUTING=`+this.data.travelTime.startFrom.transportation),t.push(`VALUE=URI`),`address`in this.data.travelTime.startFrom.location&&this.data.travelTime.startFrom.location.address&&t.push(`X-ADDRESS=`+c(this.data.travelTime.startFrom.location.address,false)),`radius`in this.data.travelTime.startFrom.location&&this.data.travelTime.startFrom.location.radius&&t.push(`X-APPLE-RADIUS=`+c(this.data.travelTime.startFrom.location.radius,false)),`title`in this.data.travelTime.startFrom.location&&this.data.travelTime.startFrom.location.title&&t.push(`X-TITLE=`+c(this.data.travelTime.startFrom.location.title,false)),e+=t.join(`;`),`geo`in this.data.travelTime.startFrom.location&&this.data.travelTime.startFrom.location.geo&&(e+=`:geo:`+c(this.data.travelTime.startFrom.location.geo?.lat,false)+`,`+c(this.data.travelTime.startFrom.location.geo?.lon,false)),e+=`\r
+`;}return this.data.description&&(e+=`DESCRIPTION:`+c(this.data.description.plain,false)+`\r
+`,this.data.description.html&&(e+=`X-ALT-DESC;FMTTYPE=text/html:`+c(this.data.description.html,false)+`\r
+`)),this.data.organizer&&(e+=`ORGANIZER;CN="`+c(this.data.organizer.name,true)+`"`,this.data.organizer.sentBy&&(e+=`;SENT-BY="mailto:`+c(this.data.organizer.sentBy,true)+`"`),this.data.organizer.email&&this.data.organizer.mailto&&(e+=`;EMAIL=`+c(this.data.organizer.email,false)),e+=`:`,this.data.organizer.email&&(e+=`mailto:`+c(this.data.organizer.mailto||this.data.organizer.email,false)),e+=`\r
+`),this.data.attendees.forEach(function(t){e+=t.toString();}),this.data.alarms.forEach(function(t){e+=t.toString();}),this.data.categories.length>0&&(e+=`CATEGORIES:`+this.data.categories.map(e=>e.toString()).join()+`\r
+`),this.data.url&&(e+=`URL;VALUE=URI:`+c(this.data.url,false)+`\r
+`),this.data.attachments.length>0&&this.data.attachments.forEach(t=>{e+=`ATTACH:`+c(t,false)+`\r
+`;}),this.data.status&&(e+=`STATUS:`+this.data.status.toUpperCase()+`\r
+`),this.data.busystatus&&(e+=`X-MICROSOFT-CDO-BUSYSTATUS:`+this.data.busystatus.toUpperCase()+`\r
+`),this.data.priority!==null&&(e+=`PRIORITY:`+this.data.priority+`\r
+`),e+=f(this.data),this.data.created&&(e+=`CREATED:`+u(this.calendar.timezone(),this.data.created)+`\r
+`),this.data.lastModified&&(e+=`LAST-MODIFIED:`+u(this.calendar.timezone(),this.data.lastModified)+`\r
+`),this.data.class&&(e+=`CLASS:`+this.data.class.toUpperCase()+`\r
+`),e+=`END:VEVENT\r
+`,e}transparency(e){return e===void 0?this.data.transparency:e?(this.data.transparency=o(B,e),this):(this.data.transparency=null,this)}travelTime(e){if(e===void 0)return this.data.travelTime;if(typeof e==`number`&&e<=0)throw Error("`travelTime` has to be more than 0!");if(e&&typeof e==`object`&&`seconds`in e&&e.seconds<=0)throw Error("`travelTime.seconds` has to be more than 0!");return typeof e==`number`?(this.data.travelTime={seconds:e},this):(this.data.travelTime=e,this)}uid(e){return e===void 0?this.id():this.id(e)}url(e){return e===void 0?this.data.url:(this.data.url=e?String(e):null,this)}x(e,t){return e===void 0?i(this.data):(typeof e==`string`&&typeof t==`string`&&i(this.data,e,t),typeof e==`object`&&i(this.data,e),this)}swapStartAndEndIfRequired(){if(this.data.start&&this.data.end&&T(this.data.start).getTime()>T(this.data.end).getTime()){let e=this.data.start;this.data.start=this.data.end,this.data.end=e;}}};let H=function(e){return e.ADD=`ADD`,e.CANCEL=`CANCEL`,e.COUNTER=`COUNTER`,e.DECLINECOUNTER=`DECLINECOUNTER`,e.PUBLISH=`PUBLISH`,e.REFRESH=`REFRESH`,e.REPLY=`REPLY`,e.REQUEST=`REQUEST`,e}({});var U=class{data;constructor(e={}){this.data={color:null,description:null,events:[],method:null,name:null,prodId:`//sebbo.net//ical-generator//EN`,scale:null,source:null,timezone:null,ttl:null,url:null,x:[]},e.prodId!==void 0&&this.prodId(e.prodId),e.method!==void 0&&this.method(e.method),e.name!==void 0&&this.name(e.name),e.description!==void 0&&this.description(e.description),e.timezone!==void 0&&this.timezone(e.timezone),e.source!==void 0&&this.source(e.source),e.url!==void 0&&this.url(e.url),e.scale!==void 0&&this.scale(e.scale),e.ttl!==void 0&&this.ttl(e.ttl),e.color!==void 0&&this.color(e.color),e.events!==void 0&&this.events(e.events),e.x!==void 0&&this.x(e.x);}clear(){return this.data.events=[],this}color(e){if(e===void 0)return this.data.color;if(typeof e==`string`&&!/^#[A-F0-9]{6}$/gi.test(e))throw Error("`color` is malformed!");return this.data.color=e?String(e).toUpperCase():null,this}createEvent(e){let t=e instanceof V?e:new V(e,this);return this.data.events.push(t),t}description(e){return e===void 0?this.data.description:(this.data.description=e?String(e):null,this)}events(e){return e?(e.forEach(e=>this.createEvent(e)),this):this.data.events}length(){return this.data.events.length}method(e){return e===void 0?this.data.method:e?(this.data.method=o(H,e),this):(this.data.method=null,this)}name(e){return e===void 0?this.data.name:(this.data.name=e?String(e):null,this)}prodId(e){if(!e)return this.data.prodId;if(typeof e==`string`)return this.data.prodId=e,this;if(typeof e!=`object`)throw Error("`prodid` needs to be a string or an object!");if(!e.company)throw Error("`prodid.company` is a mandatory item!");if(!e.product)throw Error("`prodid.product` is a mandatory item!");let t=(e.language||`EN`).toUpperCase();return this.data.prodId=`//`+e.company+`//`+e.product+`//`+t,this}scale(e){return e===void 0?this.data.scale:(e===null?this.data.scale=null:this.data.scale=e.toUpperCase(),this)}source(e){return e===void 0?this.data.source:(this.data.source=e||null,this)}timezone(e){return e===void 0?this.data.timezone?.name||null:(e===`UTC`?this.data.timezone=null:typeof e==`string`?this.data.timezone={name:e}:e===null?this.data.timezone=null:this.data.timezone=e,this)}toJSON(){return Object.assign({},this.data,{events:this.data.events.map(e=>e.toJSON()),timezone:this.timezone(),x:this.x()})}toString(){let e=``;return e=`BEGIN:VCALENDAR\r
 VERSION:2.0\r
-`,t+="PRODID:-"+this.data.prodId+`\r
-`,this.data.url&&(t+="URL:"+this.data.url+`\r
-`),this.data.source&&(t+="SOURCE;VALUE=URI:"+this.data.source+`\r
-`),this.data.scale&&(t+="CALSCALE:"+this.data.scale+`\r
-`),this.data.method&&(t+="METHOD:"+this.data.method+`\r
-`),this.data.name&&(t+="NAME:"+this.data.name+`\r
-`,t+="X-WR-CALNAME:"+this.data.name+`\r
-`),this.data.description&&(t+="X-WR-CALDESC:"+this.data.description+`\r
-`),this.data.timezone?.generator&&[...new Set([this.timezone(),...this.data.events.map(n=>n.timezone())])].filter(n=>n!==null&&!n.startsWith("/")).forEach(n=>{if(!this.data.timezone?.generator)return;let i=this.data.timezone.generator(n);i&&(t+=i.replace(/\r\n/g,`
+`,e+=`PRODID:-`+this.data.prodId+`\r
+`,this.data.url&&(e+=`URL:`+this.data.url+`\r
+`),this.data.source&&(e+=`SOURCE;VALUE=URI:`+this.data.source+`\r
+`),this.data.scale&&(e+=`CALSCALE:`+this.data.scale+`\r
+`),this.data.method&&(e+=`METHOD:`+this.data.method+`\r
+`),this.data.name&&(e+=`NAME:`+this.data.name+`\r
+`,e+=`X-WR-CALNAME:`+this.data.name+`\r
+`),this.data.description&&(e+=`X-WR-CALDESC:`+this.data.description+`\r
+`),this.data.timezone?.generator&&[...new Set([this.timezone(),...this.data.events.map(e=>e.timezone())])].filter(e=>e!==null&&!e.startsWith(`/`)).forEach(t=>{if(!this.data.timezone?.generator)return;let n=this.data.timezone.generator(t);n&&(e+=n.replace(/\r\n/g,`
 `).replace(/\n/g,`\r
 `).trim()+`\r
-`);}),this.data.timezone?.name&&(t+="TIMEZONE-ID:"+this.data.timezone.name+`\r
-`,t+="X-WR-TIMEZONE:"+this.data.timezone.name+`\r
-`),this.data.ttl&&(t+="REFRESH-INTERVAL;VALUE=DURATION:"+C(this.data.ttl)+`\r
-`,t+="X-PUBLISHED-TTL:"+C(this.data.ttl)+`\r
-`),this.data.events.forEach(e=>t+=e.toString()),t+=D(this.data),t+="END:VCALENDAR",N(t)}ttl(t){return t===void 0?this.data.ttl:(J(t)?this.data.ttl=t.asSeconds():t&&t>0?this.data.ttl=t:this.data.ttl=null,this)}url(t){return t===void 0?this.data.url:(this.data.url=t||null,this)}x(t,e){if(t===void 0)return l(this.data);if(typeof t=="string"&&typeof e=="string")l(this.data,t,e);else if(typeof t=="object")l(this.data,t);else throw new Error("Either key or value is not a string!");return this}};
+`);}),this.data.timezone?.name&&(e+=`TIMEZONE-ID:`+this.data.timezone.name+`\r
+`,e+=`X-WR-TIMEZONE:`+this.data.timezone.name+`\r
+`),this.data.ttl&&(e+=`REFRESH-INTERVAL;VALUE=DURATION:`+E(this.data.ttl)+`\r
+`,e+=`X-PUBLISHED-TTL:`+E(this.data.ttl)+`\r
+`),this.data.color&&(e+=`X-APPLE-CALENDAR-COLOR:`+this.data.color+`\r
+`),this.data.events.forEach(t=>e+=t.toString()),e+=f(this.data),e+=`END:VCALENDAR`,l(e)}ttl(e){return e===void 0?this.data.ttl:(g(e)?this.data.ttl=e.asSeconds():e&&e>0?this.data.ttl=e:this.data.ttl=null,this)}url(e){return e===void 0?this.data.url:(this.data.url=e||null,this)}x(e,t){if(e===void 0)return i(this.data);if(typeof e==`string`&&typeof t==`string`)i(this.data,e,t);else if(typeof e==`object`)i(this.data,e);else throw Error(`Either key or value is not a string!`);return this}};
 
 var xml2js = {};
 
@@ -38135,7 +38352,7 @@ var hasRequiredSax;
 function requireSax () {
 	if (hasRequiredSax) return sax;
 	hasRequiredSax = 1;
-	(function (exports$1) {
+	(function (exports) {
 (function (sax) {
 		  // wrapper for non-node envs
 		  sax.parser = function (strict, opt) {
@@ -39855,7 +40072,7 @@ function requireSax () {
 		      }
 		    })();
 		  }
-		})(exports$1); 
+		})(exports); 
 	} (sax));
 	return sax;
 }
@@ -39929,7 +40146,7 @@ var hasRequiredParser;
 function requireParser () {
 	if (hasRequiredParser) return parser;
 	hasRequiredParser = 1;
-	(function (exports$1) {
+	(function (exports) {
 		// Generated by CoffeeScript 1.12.7
 		(function() {
 		  var bom, defaults, defineProperty, events, isEmpty, processItem, processors, sax, setImmediate,
@@ -39972,7 +40189,7 @@ function requireParser () {
 		    return Object.defineProperty(obj, key, descriptor);
 		  };
 
-		  exports$1.Parser = (function(superClass) {
+		  exports.Parser = (function(superClass) {
 		    extend(Parser, superClass);
 
 		    function Parser(opts) {
@@ -39982,8 +40199,8 @@ function requireParser () {
 		      this.assignOrPush = bind(this.assignOrPush, this);
 		      this.processAsync = bind(this.processAsync, this);
 		      var key, ref, value;
-		      if (!(this instanceof exports$1.Parser)) {
-		        return new exports$1.Parser(opts);
+		      if (!(this instanceof exports.Parser)) {
+		        return new exports.Parser(opts);
 		      }
 		      this.options = {};
 		      ref = defaults["0.2"];
@@ -40295,7 +40512,7 @@ function requireParser () {
 
 		  })(events);
 
-		  exports$1.parseString = function(str, a, b) {
+		  exports.parseString = function(str, a, b) {
 		    var cb, options, parser;
 		    if (b != null) {
 		      if (typeof b === 'function') {
@@ -40310,16 +40527,16 @@ function requireParser () {
 		      }
 		      options = {};
 		    }
-		    parser = new exports$1.Parser(options);
+		    parser = new exports.Parser(options);
 		    return parser.parseString(str, cb);
 		  };
 
-		  exports$1.parseStringPromise = function(str, a) {
+		  exports.parseStringPromise = function(str, a) {
 		    var options, parser;
 		    if (typeof a === 'object') {
 		      options = a;
 		    }
-		    parser = new exports$1.Parser(options);
+		    parser = new exports.Parser(options);
 		    return parser.parseStringPromise(str);
 		  };
 
@@ -40483,7 +40700,7 @@ const getHolidays = async (token, year) => {
     });
 };
 const createCalendar = (holidays) => {
-    const calendar = new T({
+    const calendar = new U({
         name: 'Производственный календарь',
         ttl: 86400
     });
