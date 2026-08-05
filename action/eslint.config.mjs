@@ -1,26 +1,15 @@
-import {FlatCompat} from '@eslint/eslintrc'
 import js from '@eslint/js'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import prettier from 'eslint-plugin-prettier'
 import globals from 'globals'
 
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all
-})
-
 export default [
   {
     ignores: ['**/dist', '**/node_modules']
   },
-  ...compat.extends(
-    'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended'
-  ),
+  js.configs.recommended,
+  ...typescriptEslint.configs['flat/recommended'],
   {
     plugins: {
       prettier,
